@@ -30,8 +30,12 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { user, loading } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -61,7 +65,7 @@ export default function LoginPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      await createUserWithEmailAndPassword(auth, registerEmail, registerPassword);
       router.push('/dashboard');
     } catch (error: any) {
       console.error('Error signing up with email and password: ', error);
@@ -79,7 +83,7 @@ export default function LoginPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
       router.push('/dashboard');
     } catch (error: any) {
       console.error('Error signing in with email and password: ', error);
@@ -123,11 +127,11 @@ export default function LoginPage() {
                 <div className="grid gap-4 py-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
-                    <Input id="login-email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Input id="login-email" type="email" placeholder="m@example.com" required value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Password</Label>
-                    <Input id="login-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <Input id="login-password" type="password" required value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -155,11 +159,11 @@ export default function LoginPage() {
                 <div className="grid gap-4 py-4">
                   <div className="space-y-2">
                     <Label htmlFor="register-email">Email</Label>
-                    <Input id="register-email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Input id="register-email" type="email" placeholder="m@example.com" required value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="register-password">Password</Label>
-                    <Input id="register-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <Input id="register-password" type="password" required value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} />
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
