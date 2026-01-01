@@ -14,11 +14,13 @@ import { SiteFooter } from '@/components/footer';
 import WhatsAppFAB from '@/components/whatsapp-fab';
 import PromoBanner from '@/components/promo-banner';
 
+const ADMIN_EMAIL = 'admin@gmail.com';
 
 function UserHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const { user } = useAuth();
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
   useEffect(() => {
     setOpen(false);
@@ -45,12 +47,14 @@ function UserHeader() {
                   Account
                 </Link>
               </Button>
-              <Button variant={pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') ? 'secondary' : 'ghost'} asChild>
-                  <Link href="/dashboard">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Admin Panel
-                  </Link>
-              </Button>
+              {isAdmin && (
+                <Button variant={pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') ? 'secondary' : 'ghost'} asChild>
+                    <Link href="/dashboard">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Admin Panel
+                    </Link>
+                </Button>
+              )}
             </>
           )}
           <AdminHeader />
@@ -83,10 +87,12 @@ function UserHeader() {
                                 <UserIcon className="h-4 w-4" />
                                 Account
                             </Link>
-                            <Link href="/dashboard" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname === '/dashboard' && 'bg-muted text-primary')}>
-                                <LayoutDashboard className="h-4 w-4" />
-                                Admin Panel
-                            </Link>
+                            {isAdmin && (
+                              <Link href="/dashboard" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname === '/dashboard' && 'bg-muted text-primary')}>
+                                  <LayoutDashboard className="h-4 w-4" />
+                                  Admin Panel
+                              </Link>
+                            )}
                         </>
                     )}
                     <div className="absolute bottom-4 right-4">
