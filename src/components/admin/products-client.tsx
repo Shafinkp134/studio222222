@@ -46,11 +46,12 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { addProduct, updateProduct, deleteProduct } from '@/app/actions';
-import { Edit, PlusCircle, Trash2, Loader2 } from 'lucide-react';
+import { Edit, PlusCircle, Trash2, Loader2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '../ui/card';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Badge } from '../ui/badge';
 
 const productSchema = z.object({
@@ -70,6 +71,8 @@ export default function ProductsClient() {
   const [isPending, startTransition] = useTransition();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -106,10 +109,22 @@ export default function ProductsClient() {
     },
   });
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      form.setValue('imageUrl', URL.createObjectURL(file), { shouldValidate: true }); // temporary url for validation
+    }
+  };
+
   const handleDialogOpen = (product: Product | null) => {
     setCurrentProduct(product);
+    setSelectedFile(null);
+    setPreviewUrl(null);
     if (product) {
       form.reset(product);
+      setPreviewUrl(product.imageUrl);
     } else {
       form.reset({ name: '', description: '', price: 0, stock: 0, imageUrl: '', category: '' });
     }
@@ -119,15 +134,26 @@ export default function ProductsClient() {
   const onSubmit = (data: ProductFormData) => {
     startTransition(async () => {
       try {
+        let imageUrl = data.imageUrl;
+
+        if (selectedFile) {
+          const storageRef = ref(storage, `products/${Date.now()}_${selectedFile.name}`);
+          const uploadResult = await uploadBytes(storageRef, selectedFile);
+          imageUrl = await getDownloadURL(uploadResult.ref);
+        }
+
+        const productData = { ...data, imageUrl };
+
         if (currentProduct) {
-          await updateProduct(currentProduct.id, data);
+          await updateProduct(currentProduct.id, productData);
           toast({ title: 'Success', description: 'Product updated successfully.' });
         } else {
-          await addProduct(data);
+          await addProduct(productData);
           toast({ title: 'Success', description: 'Product added successfully.' });
         }
         setDialogOpen(false);
       } catch (error) {
+        console.error(error);
         toast({
           title: 'Error',
           description: `Failed to ${currentProduct ? 'update' : 'add'} product.`,
@@ -314,14 +340,34 @@ export default function ProductsClient() {
                   </FormItem>
                 )}
               />
-              <FormField
+              <FormItem>
+                <FormLabel>Product Image</FormLabel>
+                <FormControl>
+                    <div className="flex items-center gap-4">
+                        <label htmlFor="file-upload" className="flex-1">
+                            <Button type="button" variant="outline" className="w-full" asChild>
+                                <span>
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    {selectedFile ? "Change Image" : "Upload Image"}
+                                </span>
+                            </Button>
+                            <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
+                        </label>
+                        {previewUrl && (
+                            <Image src={previewUrl} alt="Product preview" width={64} height={64} className="rounded-md object-cover"/>
+                        )}
+                    </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+               <FormField
                 control={form.control}
                 name="imageUrl"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="sr-only">
                     <FormLabel>Image URL</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} readOnly/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
