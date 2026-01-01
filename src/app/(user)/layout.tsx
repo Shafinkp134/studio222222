@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 function UserHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
 
   useEffect(() => {
     setOpen(false);
@@ -34,12 +35,14 @@ function UserHeader() {
               Shop
             </Link>
           </Button>
-          <Button variant={pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') ? 'secondary' : 'ghost'} asChild>
-            <Link href="/dashboard">
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                Admin Panel
-            </Link>
-          </Button>
+          {user && (
+            <Button variant={pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') ? 'secondary' : 'ghost'} asChild>
+                <Link href="/dashboard">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Admin Panel
+                </Link>
+            </Button>
+          )}
           <AdminHeader />
         </div>
         <div className="md:hidden">
@@ -64,10 +67,12 @@ function UserHeader() {
                       <ShoppingBag className="h-4 w-4" />
                       Shop
                     </Link>
-                    <Link href="/dashboard" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname === '/dashboard' && 'bg-muted text-primary')}>
-                        <LayoutDashboard className="h-4 w-4" />
-                        Admin Panel
-                    </Link>
+                    {user && (
+                        <Link href="/dashboard" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname === '/dashboard' && 'bg-muted text-primary')}>
+                            <LayoutDashboard className="h-4 w-4" />
+                            Admin Panel
+                        </Link>
+                    )}
                     <div className="absolute bottom-4 right-4">
                         <AdminHeader />
                     </div>
@@ -83,14 +88,17 @@ function UserHeader() {
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Only protect the /account route in this layout
+    if (pathname === '/account' && !loading && !user) {
       router.replace('/login');
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, pathname]);
 
-  if (loading || !user) {
+  // For /account page, show loader until auth state is resolved
+  if (pathname === '/account' && (loading || !user)) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -98,6 +106,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
+  // For other pages like /shop, render immediately
   return (
     <div className="flex min-h-screen w-full flex-col">
         <UserHeader />

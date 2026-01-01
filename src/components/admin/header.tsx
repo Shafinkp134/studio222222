@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User as UserIcon, Menu, LayoutGrid, Gift, ClipboardList } from 'lucide-react';
+import { LogOut, User as UserIcon, Menu, LayoutGrid, Gift, ClipboardList, LogIn } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -83,12 +83,28 @@ export function AdminHeader() {
     }
     return name[0];
   };
+  
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders');
+
+  if (!user) {
+    return (
+        <Button asChild>
+            <Link href="/login">
+                <LogIn className="mr-2 h-4 w-4"/>
+                Login
+            </Link>
+        </Button>
+    )
+  }
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 md:justify-end">
-       <div className="md:hidden">
+    <header className={cn("sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6", isAdminRoute ? 'justify-between md:justify-end' : 'justify-end')}>
+       {isAdminRoute && (
+        <div className="md:hidden">
             <MobileNav />
        </div>
+       )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
