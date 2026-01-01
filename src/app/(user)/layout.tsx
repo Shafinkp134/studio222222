@@ -3,12 +3,12 @@
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Loader2, LayoutDashboard, Menu, ShoppingBag, Gift, ClipboardList } from 'lucide-react';
+import { Loader2, LayoutDashboard, Menu, ShoppingBag } from 'lucide-react';
 import { AdminHeader } from '@/components/admin/header';
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
 
@@ -51,6 +51,10 @@ function UserHeader() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
+                <SheetHeader>
+                    <SheetTitle className="sr-only">Menu</SheetTitle>
+                    <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
+                </SheetHeader>
                 <nav className="grid gap-6 text-lg font-medium">
                     <Link href="/shop" className="flex items-center gap-2 font-headline text-lg font-semibold mb-4">
                         <Logo className="h-6 w-6 text-primary" />

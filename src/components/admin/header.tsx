@@ -16,7 +16,7 @@ import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Logo } from '../logo';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,10 @@ function MobileNav() {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left">
+                <SheetHeader>
+                    <SheetTitle className="sr-only">Admin Menu</SheetTitle>
+                    <SheetDescription className="sr-only">Admin navigation menu</SheetDescription>
+                </SheetHeader>
                 <nav className="grid gap-6 text-lg font-medium">
                     <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
                         <Logo className="h-6 w-6 text-primary" />
