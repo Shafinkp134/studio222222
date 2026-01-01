@@ -2,18 +2,36 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Gift } from 'lucide-react';
+import { X, Gift, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { BannerSettings } from '@/lib/types';
 
 export default function PromoBanner() {
   const [isOpen, setIsOpen] = useState(false);
+  const [settings, setSettings] = useState<BannerSettings | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // sessionStorage is used to remember if the user has closed the banner during their current session.
-    const isDismissed = sessionStorage.getItem('promoBannerDismissed');
-    if (isDismissed !== 'true') {
-      setIsOpen(true);
-    }
+    const bannerSettingsRef = doc(db, 'settings', 'promoBanner');
+    const unsubscribe = onSnapshot(bannerSettingsRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const bannerData = docSnap.data() as BannerSettings;
+        setSettings(bannerData);
+        const isDismissed = sessionStorage.getItem('promoBannerDismissed');
+        if (bannerData.enabled && isDismissed !== 'true') {
+          setIsOpen(true);
+        } else {
+          setIsOpen(false);
+        }
+      } else {
+        setIsOpen(false);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleDismiss = () => {
@@ -21,7 +39,12 @@ export default function PromoBanner() {
     setIsOpen(false);
   };
 
-  if (!isOpen) {
+  if (loading) {
+    // You might want a subtle loader or just return null to avoid layout shift
+    return null;
+  }
+
+  if (!isOpen || !settings || !settings.enabled) {
     return null;
   }
 
@@ -32,7 +55,7 @@ export default function PromoBanner() {
           <div className="flex items-center gap-4">
             <Gift className="h-6 w-6" />
             <p className="font-medium">
-              <span className="hidden sm:inline">Special Offer!</span> Get 20% off on all items.
+              <span className="hidden sm:inline">{settings.text.split('!')[0]}!</span> {settings.text.split('!')[1]}
             </p>
           </div>
           <div className="flex items-center gap-4">

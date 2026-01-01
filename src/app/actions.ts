@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { collection, addDoc, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Product } from '@/lib/types';
+import type { Product, BannerSettings } from '@/lib/types';
 
 
 // Product Actions
@@ -23,6 +23,7 @@ export async function updateProduct(productId: string, productData: Partial<Prod
     const productRef = doc(db, 'products', productId);
     await updateDoc(productRef, productData);
     revalidatePath('/products');
+    revalidatePath(`/shop/${productId}`);
   } catch (error) {
     console.error('Error updating product:', error);
     throw new Error('Could not update product.');
@@ -61,4 +62,16 @@ export async function deleteOrder(orderId: string) {
         console.error('Error deleting order:', error);
         throw new Error('Could not delete order.');
     }
+}
+
+// Banner Actions
+export async function updateBannerSettings(settings: BannerSettings) {
+  try {
+    const bannerRef = doc(db, 'settings', 'promoBanner');
+    await setDoc(bannerRef, settings, { merge: true });
+    revalidatePath('/shop'); // Revalidate shop to show/hide banner
+  } catch (error) {
+    console.error('Error updating banner settings:', error);
+    throw new Error('Could not update banner settings.');
+  }
 }

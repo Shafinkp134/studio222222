@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User as UserIcon, Menu, LayoutGrid, Gift, ClipboardList, LogIn, Users } from 'lucide-react';
+import { LogOut, User as UserIcon, Menu, LayoutGrid, Gift, ClipboardList, LogIn, Users, Megaphone } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -26,6 +26,7 @@ const navItems = [
   { href: '/products', label: 'Products', icon: Gift },
   { href: '/orders', label: 'Orders', icon: ClipboardList },
   { href: '/users', label: 'Users', icon: Users },
+  { href: '/banner', label: 'Banner', icon: Megaphone },
 ];
 
 function MobileNav() {
@@ -86,7 +87,7 @@ export function AdminHeader() {
   };
   
   const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') || pathname.startsWith('/users');
+  const isAdminRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') || pathname.startsWith('/users') || pathname.startsWith('/banner');
 
   if (!user) {
     return (

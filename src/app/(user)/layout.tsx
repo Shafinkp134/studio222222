@@ -48,7 +48,7 @@ function UserHeader() {
                 </Link>
               </Button>
               {isAdmin && (
-                <Button variant={pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') ? 'secondary' : 'ghost'} asChild>
+                <Button variant={pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') || pathname.startsWith('/banner') ? 'secondary' : 'ghost'} asChild>
                     <Link href="/dashboard">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         Admin Panel

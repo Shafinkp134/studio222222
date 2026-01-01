@@ -22,3 +22,8 @@ export type Order = {
   giftWrap?: boolean;
   customerNotes?: string;
 };
+
+export type BannerSettings = {
+  text: string;
+  enabled: boolean;
+};
