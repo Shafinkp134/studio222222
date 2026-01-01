@@ -45,8 +45,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { addProduct, updateProduct, deleteProduct, getCloudinarySignature } from '@/app/actions';
-import { Edit, PlusCircle, Trash2, Loader2, Upload } from 'lucide-react';
+import { addProduct, updateProduct, deleteProduct } from '@/app/actions';
+import { Edit, PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '../ui/card';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -71,8 +71,6 @@ export default function ProductsClient() {
   const [isPending, startTransition] = useTransition();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -109,22 +107,10 @@ export default function ProductsClient() {
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-      form.setValue('imageUrl', 'https://placeholder.com/image.jpg', { shouldValidate: true }); // temporary url for validation
-    }
-  };
-
   const handleDialogOpen = (product: Product | null) => {
     setCurrentProduct(product);
-    setSelectedFile(null);
-    setPreviewUrl(null);
     if (product) {
       form.reset(product);
-      setPreviewUrl(product.imageUrl);
     } else {
       form.reset({ name: '', description: '', price: 0, stock: 0, imageUrl: '', category: '' });
     }
@@ -134,38 +120,11 @@ export default function ProductsClient() {
   const onSubmit = (data: ProductFormData) => {
     startTransition(async () => {
       try {
-        let imageUrl = data.imageUrl;
-
-        if (selectedFile) {
-          const { signature, timestamp } = await getCloudinarySignature();
-          
-          const formData = new FormData();
-          formData.append('file', selectedFile);
-          formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY!);
-          formData.append('signature', signature);
-          formData.append('timestamp', timestamp.toString());
-          formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!);
-          
-          const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!uploadResponse.ok) {
-            throw new Error('Image upload failed');
-          }
-          
-          const cloudinaryData = await uploadResponse.json();
-          imageUrl = cloudinaryData.secure_url;
-        }
-
-        const productData = { ...data, imageUrl };
-
         if (currentProduct) {
-          await updateProduct(currentProduct.id, productData);
+          await updateProduct(currentProduct.id, data);
           toast({ title: 'Success', description: 'Product updated successfully.' });
         } else {
-          await addProduct(productData);
+          await addProduct(data);
           toast({ title: 'Success', description: 'Product added successfully.' });
         }
         setDialogOpen(false);
@@ -358,34 +317,14 @@ export default function ProductsClient() {
                     </FormItem>
                   )}
                 />
-                <FormItem>
-                  <FormLabel>Product Image</FormLabel>
-                  <FormControl>
-                      <div className="flex items-center gap-4">
-                          <label htmlFor="file-upload" className="flex-1">
-                              <Button type="button" variant="outline" className="w-full" asChild>
-                                  <span>
-                                      <Upload className="mr-2 h-4 w-4" />
-                                      {selectedFile ? "Change Image" : "Upload Image"}
-                                  </span>
-                              </Button>
-                              <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
-                          </label>
-                          {previewUrl && (
-                              <Image src={previewUrl} alt="Product preview" width={64} height={64} className="rounded-md object-cover"/>
-                          )}
-                      </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
                 <FormField
                   control={form.control}
                   name="imageUrl"
                   render={({ field }) => (
-                    <FormItem className="sr-only">
+                    <FormItem>
                       <FormLabel>Image URL</FormLabel>
                       <FormControl>
-                        <Input {...field} readOnly/>
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
