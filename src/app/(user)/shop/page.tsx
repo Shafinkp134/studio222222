@@ -1,19 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import type { Product } from '@/lib/types';
+import { collection, onSnapshot, addDoc } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
+import type { Product, Order } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { Loader2, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
@@ -36,12 +40,42 @@ export default function ShopPage() {
     return () => unsubscribe();
   }, [toast]);
 
-  const handleAddToCart = (product: Product) => {
-    // TODO: Implement add to cart functionality
-    toast({
-      title: 'Added to cart',
-      description: `${product.name} has been added to your cart.`,
-    });
+  const handleAddToCart = async (product: Product) => {
+    if (!user) {
+      toast({
+        title: 'Not logged in',
+        description: 'You need to be logged in to place an order.',
+        variant: 'destructive',
+      });
+      router.push('/login');
+      return;
+    }
+
+    try {
+        const newOrder: Omit<Order, 'id'> = {
+            customerName: user.displayName || 'Anonymous',
+            customerEmail: user.email || 'no-email',
+            date: new Date().toISOString(),
+            status: 'Pending',
+            total: product.price,
+            items: [{ productId: product.id, name: product.name, quantity: 1 }],
+            shippingAddress: 'To be confirmed',
+        };
+
+        await addDoc(collection(db, 'orders'), newOrder);
+
+        toast({
+            title: 'Order Placed!',
+            description: `${product.name} has been ordered.`,
+        });
+    } catch (error) {
+        console.error('Error placing order:', error);
+        toast({
+            title: 'Error',
+            description: 'Could not place your order. Please try again.',
+            variant: 'destructive',
+        });
+    }
   };
 
   if (loading) {
@@ -79,7 +113,7 @@ export default function ShopPage() {
             <CardFooter>
               <Button className="w-full" onClick={() => handleAddToCart(product)}>
                 <ShoppingCart className="mr-2 h-4 w-4" />
-                Add to Cart
+                Place Order
               </Button>
             </CardFooter>
           </Card>
