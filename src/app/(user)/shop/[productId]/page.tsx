@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase';
 import type { Product, Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Loader2, ShoppingCart } from 'lucide-react';
+import { Loader2, ShoppingCart, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter, useParams } from 'next/navigation';
@@ -15,6 +15,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+
+const GIFT_WRAP_COST = 15;
 
 export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
@@ -24,6 +27,8 @@ export default function ProductDetailPage() {
   const [phone, setPhone] = useState('');
   const [transactionId, setTransactionId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [giftWrap, setGiftWrap] = useState(false);
+  const [customerNotes, setCustomerNotes] = useState('');
   
   const { toast } = useToast();
   const { user } = useAuth();
@@ -69,6 +74,8 @@ export default function ProductDetailPage() {
     setShippingAddress('');
     setPhone('');
     setTransactionId('');
+    setGiftWrap(false);
+    setCustomerNotes('');
   };
   
   const handleConfirmOrder = async () => {
@@ -85,16 +92,20 @@ export default function ProductDetailPage() {
 
     setIsSubmitting(true);
     try {
+        const total = product.price + (giftWrap ? GIFT_WRAP_COST : 0);
+
         const newOrder: Omit<Order, 'id'> = {
             customerName: user.displayName || 'Anonymous',
             customerEmail: user.email || 'no-email',
             date: new Date().toISOString(),
             status: 'Pending',
-            total: product.price,
+            total: total,
             items: [{ productId: product.id, name: product.name, quantity: 1 }],
             shippingAddress: shippingAddress,
             phone: phone,
             transactionId: transactionId,
+            giftWrap: giftWrap,
+            customerNotes: customerNotes,
         };
 
         await addDoc(collection(db, 'orders'), newOrder);
@@ -115,6 +126,8 @@ export default function ProductDetailPage() {
         setIsSubmitting(false);
     }
   };
+
+  const orderTotal = product ? product.price + (giftWrap ? GIFT_WRAP_COST : 0) : 0;
 
   if (loading) {
     return (
@@ -157,7 +170,7 @@ export default function ProductDetailPage() {
       </Card>
       
        <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Confirm Your Order</DialogTitle>
             <DialogDescription>
@@ -167,7 +180,18 @@ export default function ProductDetailPage() {
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
                 <h4 className="font-medium">{product?.name}</h4>
-                <p className="text-muted-foreground">₹{product?.price.toFixed(2)}</p>
+                <div className="flex justify-between items-center">
+                  <p className="text-muted-foreground">Product Price:</p>
+                  <p className="text-muted-foreground">₹{product?.price.toFixed(2)}</p>
+                </div>
+                 <div className="flex justify-between items-center">
+                  <p className="text-muted-foreground">Gift Wrap:</p>
+                  <p className="text-muted-foreground">₹{giftWrap ? GIFT_WRAP_COST.toFixed(2) : '0.00'}</p>
+                </div>
+                 <div className="flex justify-between items-center font-medium border-t pt-2 mt-2">
+                  <p>Total:</p>
+                  <p>₹{orderTotal.toFixed(2)}</p>
+                </div>
             </div>
             <div className="space-y-2">
                 <Label htmlFor="shipping-address">Shipping Address</Label>
@@ -197,6 +221,22 @@ export default function ProductDetailPage() {
                     value={transactionId}
                     onChange={(e) => setTransactionId(e.target.value)}
                 />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="customerNotes">Customer Review / Notes (Optional)</Label>
+                <Textarea
+                    id="customerNotes"
+                    placeholder="Add any special instructions or notes for your order."
+                    value={customerNotes}
+                    onChange={(e) => setCustomerNotes(e.target.value)}
+                />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="gift-wrap" checked={giftWrap} onCheckedChange={(checked) => setGiftWrap(checked as boolean)} />
+              <Label htmlFor="gift-wrap" className="flex items-center gap-2">
+                <Gift className="h-4 w-4" />
+                Add Gift Wrap (+₹{GIFT_WRAP_COST.toFixed(2)})
+              </Label>
             </div>
           </div>
           <DialogFooter>

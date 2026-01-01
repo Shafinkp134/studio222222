@@ -27,7 +27,7 @@ import { Label } from '@/components/ui/label';
 import type { Order } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { updateOrderTransactionId, deleteOrder } from '@/app/actions';
-import { Eye, CheckCircle, Loader2, Trash2 } from 'lucide-react';
+import { Eye, CheckCircle, Loader2, Trash2, Gift } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 
 const statusVariant = {
@@ -186,10 +186,24 @@ export default function OrdersClient() {
                 ))}
               </ul>
             </div>
+             {selectedOrder?.giftWrap && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Gift className="h-4 w-4 text-primary" />
+                <span>Gift wrapping requested</span>
+              </div>
+            )}
             <div className="space-y-1">
               <p className="text-sm font-medium">Shipping Address:</p>
               <p className="text-sm text-muted-foreground">{selectedOrder?.shippingAddress}</p>
             </div>
+            {selectedOrder?.customerNotes && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Customer Notes / Review:</p>
+                <p className="text-sm text-muted-foreground border p-2 rounded-md bg-muted/50">
+                  {selectedOrder.customerNotes}
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="transaction-id">Transaction ID</Label>
               <div className="flex items-center gap-2">

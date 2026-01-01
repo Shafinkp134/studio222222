@@ -19,4 +19,6 @@ export type Order = {
   shippingAddress: string;
   phone?: string;
   transactionId?: string;
+  giftWrap?: boolean;
+  customerNotes?: string;
 };
