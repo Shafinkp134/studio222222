@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription, SheetH
 import { cn } from '@/lib/utils';
 import { SiteFooter } from '@/components/footer';
 import WhatsAppFAB from '@/components/whatsapp-fab';
+import PromoBanner from '@/components/promo-banner';
 
 
 function UserHeader() {
@@ -134,6 +135,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
             {children}
         </main>
         <WhatsAppFAB />
+        <PromoBanner />
         <SiteFooter />
     </div>
   );
