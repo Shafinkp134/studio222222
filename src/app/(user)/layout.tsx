@@ -25,8 +25,7 @@ function UserHeader() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="flex h-16 items-center justify-between border-b bg-background px-4 container mx-auto">
         <Link href="/shop" className="flex items-center gap-2 font-headline text-lg font-semibold">
           <Logo className="h-6 w-6 text-primary" />
           <span>MRSHOPY</span>
@@ -97,8 +96,7 @@ function UserHeader() {
             </SheetContent>
           </Sheet>
         </div>
-      </div>
-    </header>
+      </header>
   );
 }
 
@@ -130,12 +128,14 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   // For other pages like /shop, render immediately
   return (
     <div className="flex min-h-screen w-full flex-col">
-        <UserHeader />
+        <div className="sticky top-0 z-40 w-full bg-background">
+            <UserHeader />
+            <PromoBanner />
+        </div>
         <main className="flex-1 p-4 pt-6 md:p-8 container max-w-6xl mx-auto">
             {children}
         </main>
         <WhatsAppFAB />
-        <PromoBanner />
         <SiteFooter />
     </div>
   );
