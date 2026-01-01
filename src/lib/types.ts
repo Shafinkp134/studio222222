@@ -23,6 +23,16 @@ export type Order = {
   customerNotes?: string;
 };
 
+export type UserProfile = {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  shippingAddress?: string;
+  phone?: string;
+};
+
+
 export type BannerSettings = {
   text: string;
   enabled: boolean;

@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Logo } from '@/components/logo';
+import { createOrUpdateUser } from '@/app/actions';
 
 function GoogleIcon() {
   return (
@@ -47,7 +48,8 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setIsSubmitting(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      await createOrUpdateUser(result.user);
       router.push('/shop');
     } catch (error) {
       console.error('Error signing in with Google: ', error);
@@ -65,7 +67,8 @@ export default function LoginPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await createUserWithEmailAndPassword(auth, registerEmail, registerPassword);
+      const result = await createUserWithEmailAndPassword(auth, registerEmail, registerPassword);
+      await createOrUpdateUser(result.user);
       router.push('/shop');
     } catch (error: any) {
       console.error('Error signing up with email and password: ', error);

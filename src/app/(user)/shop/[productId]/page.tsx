@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { doc, getDoc, addDoc, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Product, Order } from '@/lib/types';
+import type { Product, Order, UserProfile } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { Loader2, ShoppingCart, Gift } from 'lucide-react';
@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { getUserProfile, updateUserProfile } from '@/app/actions';
 
 const GIFT_WRAP_COST = 15;
 
@@ -60,7 +61,7 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [productId, router, toast]);
 
-  const handlePlaceOrderClick = () => {
+  const handlePlaceOrderClick = async () => {
     if (!user) {
       toast({
         title: 'Not logged in',
@@ -70,9 +71,13 @@ export default function ProductDetailPage() {
       router.push('/login');
       return;
     }
+    
+    // Fetch user profile to pre-fill details
+    const userProfile = await getUserProfile(user.uid);
+    setShippingAddress(userProfile?.shippingAddress || '');
+    setPhone(userProfile?.phone || '');
+
     setIsOrderDialogOpen(true);
-    setShippingAddress('');
-    setPhone('');
     setTransactionId('');
     setGiftWrap(false);
     setCustomerNotes('');
@@ -109,6 +114,9 @@ export default function ProductDetailPage() {
         };
 
         await addDoc(collection(db, 'orders'), newOrder);
+
+        // Update user profile with new address and phone
+        await updateUserProfile(user.uid, { shippingAddress, phone });
 
         toast({
             title: 'Order Placed!',
