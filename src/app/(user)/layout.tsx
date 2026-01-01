@@ -13,6 +13,10 @@ import { cn } from '@/lib/utils';
 import { SiteFooter } from '@/components/footer';
 import WhatsAppFAB from '@/components/whatsapp-fab';
 import PromoBanner from '@/components/promo-banner';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { SiteSettings } from '@/lib/types';
+
 
 const ADMIN_EMAIL = 'admin1@gmail.com';
 
@@ -21,6 +25,16 @@ function UserHeader() {
   const pathname = usePathname();
   const { user } = useAuth();
   const isAdmin = user?.email === ADMIN_EMAIL;
+  const [siteSettings, setSiteSettings] = useState<{name: string, logoUrl: string}>({name: 'MRSHOPY', logoUrl: ''});
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "siteInfo"), (doc) => {
+      if (doc.exists()) {
+        setSiteSettings(doc.data() as SiteSettings);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     setOpen(false);
@@ -29,8 +43,8 @@ function UserHeader() {
   return (
     <header className="flex h-16 items-center justify-between border-b bg-background px-4 container mx-auto">
         <Link href="/shop" className="flex items-center gap-2 font-headline text-lg font-semibold">
-          <Logo className="h-6 w-6 text-primary" />
-          <span>MRSHOPY</span>
+          <Logo logoUrl={siteSettings.logoUrl} className="h-6 w-6 text-primary" />
+          <span>{siteSettings.name}</span>
         </Link>
         <div className="hidden items-center gap-4 md:flex">
           <Button variant={pathname === '/shop' ? 'secondary' : 'ghost'} asChild>
@@ -74,8 +88,8 @@ function UserHeader() {
                 </SheetHeader>
                 <nav className="grid gap-6 text-lg font-medium">
                     <Link href="/shop" className="flex items-center gap-2 font-headline text-lg font-semibold mb-4">
-                        <Logo className="h-6 w-6 text-primary" />
-                        <span>MRSHOPY</span>
+                        <Logo logoUrl={siteSettings.logoUrl} className="h-6 w-6 text-primary" />
+                        <span>{siteSettings.name}</span>
                     </Link>
                     <Link href="/shop" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname === '/shop' && 'bg-muted text-primary')}>
                       <ShoppingBag className="h-4 w-4" />

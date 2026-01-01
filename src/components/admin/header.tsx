@@ -10,9 +10,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User as UserIcon, Menu, LayoutGrid, Gift, ClipboardList, LogIn, Users, Megaphone } from 'lucide-react';
+import { LogOut, User as UserIcon, Menu, LayoutGrid, Gift, ClipboardList, LogIn, Users, Megaphone, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -20,6 +20,10 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescri
 import { Logo } from '../logo';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import type { SiteSettings } from '@/lib/types';
+
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
@@ -27,10 +31,22 @@ const navItems = [
   { href: '/orders', label: 'Orders', icon: ClipboardList },
   { href: '/users', label: 'Users', icon: Users },
   { href: '/banner', label: 'Banner', icon: Megaphone },
+  { href: '/admin/settings', label: 'Site Settings', icon: Settings },
 ];
 
 function MobileNav() {
     const pathname = usePathname();
+    const [siteSettings, setSiteSettings] = useState<{name: string, logoUrl: string}>({name: 'MRSHOPY', logoUrl: ''});
+    
+    useEffect(() => {
+        const unsub = onSnapshot(doc(db, "settings", "siteInfo"), (doc) => {
+          if (doc.exists()) {
+            setSiteSettings(doc.data() as SiteSettings);
+          }
+        });
+        return () => unsub();
+    }, []);
+
     return (
         <Sheet>
             <SheetTrigger asChild>
@@ -46,8 +62,8 @@ function MobileNav() {
                 </SheetHeader>
                 <nav className="grid gap-6 text-lg font-medium">
                     <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
-                        <Logo className="h-6 w-6 text-primary" />
-                        <span>MRSHOPY</span>
+                        <Logo logoUrl={siteSettings.logoUrl} className="h-6 w-6 text-primary" />
+                        <span>{siteSettings.name}</span>
                     </Link>
                     {navItems.map((item) => (
                       <Link
@@ -87,7 +103,7 @@ export function AdminHeader() {
   };
   
   const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') || pathname.startsWith('/users') || pathname.startsWith('/banner');
+  const isAdminRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') || pathname.startsWith('/users') || pathname.startsWith('/banner') || pathname.startsWith('/admin/settings');
 
   if (!user) {
     return (

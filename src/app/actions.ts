@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { collection, addDoc, doc, updateDoc, deleteDoc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Product, BannerSettings, UserProfile } from '@/lib/types';
+import type { Product, BannerSettings, UserProfile, SiteSettings } from '@/lib/types';
 
 
 // Product Actions
@@ -114,4 +114,17 @@ export async function createOrUpdateUser(user: { uid: string, email: string | nu
             photoURL: user.photoURL,
         }, { merge: true });
     }
+}
+
+// Site Settings Actions
+export async function updateSiteSettings(settings: SiteSettings) {
+  try {
+    const siteSettingsRef = doc(db, 'settings', 'siteInfo');
+    await setDoc(siteSettingsRef, settings, { merge: true });
+    // Revalidate all paths as name and logo can appear anywhere
+    revalidatePath('/', 'layout');
+  } catch (error) {
+    console.error('Error updating site settings:', error);
+    throw new Error('Could not update site settings.');
+  }
 }

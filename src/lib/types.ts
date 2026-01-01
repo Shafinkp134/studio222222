@@ -37,3 +37,8 @@ export type BannerSettings = {
   text: string;
   enabled: boolean;
 };
+
+export type SiteSettings = {
+  name: string;
+  logoUrl: string;
+};

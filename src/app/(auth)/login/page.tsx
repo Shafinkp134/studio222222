@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { auth, googleProvider, db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,6 +15,9 @@ import { Loader2 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { createOrUpdateUser } from '@/app/actions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { doc, onSnapshot } from 'firebase/firestore';
+import type { SiteSettings } from '@/lib/types';
+
 
 function GoogleIcon() {
   return (
@@ -32,6 +35,9 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { user, loading } = useAuth();
+  
+  const [siteSettings, setSiteSettings] = useState<{name: string, logoUrl: string}>({name: 'MRSHOPY', logoUrl: ''});
+
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -42,6 +48,15 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "siteInfo"), (doc) => {
+      if (doc.exists()) {
+        setSiteSettings(doc.data() as SiteSettings);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     if (!loading && user) {
@@ -142,9 +157,9 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary">
-            <Logo className="h-8 w-8" />
+            <Logo logoUrl={siteSettings.logoUrl} className="h-8 w-8" />
           </div>
-          <CardTitle className="font-headline text-3xl">MRSHOPY</CardTitle>
+          <CardTitle className="font-headline text-3xl">{siteSettings.name}</CardTitle>
           <CardDescription>Login to your account</CardDescription>
         </CardHeader>
         <CardContent>
@@ -243,5 +258,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    

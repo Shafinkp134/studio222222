@@ -1,15 +1,30 @@
 import Link from 'next/link';
 import { Logo } from './logo';
 import { Instagram } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { SiteSettings } from '@/lib/types';
 
-export function SiteFooter() {
+
+async function getSiteSettings() {
+  const docRef = doc(db, 'settings', 'siteInfo');
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return docSnap.data() as SiteSettings;
+  }
+  return { name: 'MRSHOPY', logoUrl: 'https://res.cloudinary.com/ddqzzqnjh/image/upload/v1767286657/hbn0rm8hof8mre3zu0dk.png' };
+}
+
+export async function SiteFooter() {
+  const siteSettings = await getSiteSettings();
+
   return (
     <footer className="w-full border-t bg-background">
       <div className="container mx-auto flex flex-col items-center justify-between gap-6 py-10 md:h-24 md:flex-row md:py-0">
         <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
           <Link href="/" className="flex items-center gap-2">
-            <Logo className="h-6 w-6 text-primary" />
-            <p className="font-headline text-lg font-semibold">MRSHOPY</p>
+            <Logo logoUrl={siteSettings.logoUrl} className="h-6 w-6 text-primary" />
+            <p className="font-headline text-lg font-semibold">{siteSettings.name}</p>
           </Link>
           <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
             Built by{' '}
