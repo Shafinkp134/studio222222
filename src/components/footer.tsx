@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Logo } from './logo';
-import { Github, Twitter, Instagram } from 'lucide-react';
+import { Instagram } from 'lucide-react';
 
 export function SiteFooter() {
   return (
@@ -12,14 +12,14 @@ export function SiteFooter() {
             <p className="font-headline text-lg font-semibold">MRSHOPY</p>
           </Link>
           <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-            Built with ❤️. The source code is available on{' '}
+            Built by{' '}
             <a
-              href="https://github.com"
+              href="https://instagram.com/shafin.k.p"
               target="_blank"
               rel="noreferrer"
               className="font-medium underline underline-offset-4"
             >
-              GitHub
+              Shafin
             </a>
             .
           </p>
@@ -35,13 +35,7 @@ export function SiteFooter() {
                 Support
             </Link>
             <div className="flex items-center gap-2">
-                <a href="https://github.com" target="_blank" rel="noreferrer">
-                    <Github className="h-5 w-5 text-muted-foreground hover:text-primary" />
-                </a>
-                <a href="https://twitter.com" target="_blank" rel="noreferrer">
-                    <Twitter className="h-5 w-5 text-muted-foreground hover:text-primary" />
-                </a>
-                <a href="https://instagram.com" target="_blank" rel="noreferrer">
+                <a href="https://instagram.com/shafin.k.p" target="_blank" rel="noreferrer">
                     <Instagram className="h-5 w-5 text-muted-foreground hover:text-primary" />
                 </a>
             </div>
