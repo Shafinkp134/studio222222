@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "1",
+      "description": "A beautifully wrapped gift box with a red ribbon.",
+      "imageUrl": "https://images.unsplash.com/photo-1647221598091-880219fa2c8f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnaWZ0JTIwYm94fGVufDB8fHx8MTc2NzE3ODA1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gift box"
+    },
+    {
+      "id": "2",
+      "description": "An elegant bouquet of fresh flowers.",
+      "imageUrl": "https://images.unsplash.com/photo-1572454591674-2739f30d8c40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmbG93ZXIlMjBib3VxdWV0fGVufDB8fHx8MTc2NzI1NjkzNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "flower bouquet"
+    },
+    {
+      "id": "3",
+      "description": "A cute and cuddly teddy bear.",
+      "imageUrl": "https://images.unsplash.com/photo-1561358560-7dc4838290c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx0ZWRkeSUyMGJlYXJ8ZW58MHx8fHwxNzY3MTc4MDU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "teddy bear"
+    },
+    {
+      "id": "4",
+      "description": "A gourmet chocolate box.",
+      "imageUrl": "https://images.unsplash.com/photo-1526081347589-7fa3cb41b4b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaG9jb2xhdGUlMjBib3h8ZW58MHx8fHwxNzY3MjU2OTM1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "chocolate box"
+    },
+    {
+      "id": "5",
+      "description": "A personalized coffee mug.",
+      "imageUrl": "https://images.unsplash.com/photo-1605714196241-00bf7a8fe7bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjb2ZmZWUlMjBtdWd8ZW58MHx8fHwxNzY3MjIzMDQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "coffee mug"
+    }
+  ]
 }
