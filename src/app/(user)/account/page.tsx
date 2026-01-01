@@ -9,7 +9,7 @@ import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Order } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -38,8 +38,7 @@ export default function AccountPage() {
     const ordersCol = collection(db, 'orders');
     const q = query(
       ordersCol,
-      where('customerEmail', '==', user.email),
-      orderBy('date', 'desc')
+      where('customerEmail', '==', user.email)
     );
 
     const unsubscribe = onSnapshot(
@@ -49,6 +48,8 @@ export default function AccountPage() {
           id: doc.id,
           ...doc.data(),
         })) as Order[];
+        // Sort orders by date on the client side
+        ordersList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setOrders(ordersList);
         setOrdersLoading(false);
       },
