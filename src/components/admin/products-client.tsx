@@ -51,6 +51,7 @@ import Image from 'next/image';
 import { Card, CardContent } from '../ui/card';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { Badge } from '../ui/badge';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -58,6 +59,7 @@ const productSchema = z.object({
   price: z.coerce.number().min(0, 'Price must be a positive number'),
   stock: z.coerce.number().int().min(0, 'Stock must be a positive integer'),
   imageUrl: z.string().url('Must be a valid URL'),
+  category: z.string().min(1, 'Category is required'),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -100,6 +102,7 @@ export default function ProductsClient() {
       price: 0,
       stock: 0,
       imageUrl: '',
+      category: '',
     },
   });
 
@@ -108,7 +111,7 @@ export default function ProductsClient() {
     if (product) {
       form.reset(product);
     } else {
-      form.reset({ name: '', description: '', price: 0, stock: 0, imageUrl: '' });
+      form.reset({ name: '', description: '', price: 0, stock: 0, imageUrl: '', category: '' });
     }
     setDialogOpen(true);
   };
@@ -173,6 +176,7 @@ export default function ProductsClient() {
               <TableRow>
                 <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Name</TableHead>
+                <TableHead className="hidden md:table-cell">Category</TableHead>
                 <TableHead className="hidden md:table-cell">Price</TableHead>
                 <TableHead className="hidden md:table-cell">Stock</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -191,6 +195,9 @@ export default function ProductsClient() {
                     />
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <Badge variant="outline">{product.category}</Badge>
+                  </TableCell>
                   <TableCell className="hidden md:table-cell">${product.price.toFixed(2)}</TableCell>
                   <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                   <TableCell className="text-right">
@@ -289,6 +296,19 @@ export default function ProductsClient() {
                     <FormLabel>Stock</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

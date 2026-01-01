@@ -5,6 +5,7 @@ export type Product = {
   price: number;
   stock: number;
   imageUrl: string;
+  category: string;
 };
 
 export type Order = {
