@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription, SheetHeader } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { SiteFooter } from '@/components/footer';
+import WhatsAppFAB from '@/components/whatsapp-fab';
 
 
 function UserHeader() {
@@ -132,6 +133,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1 p-4 pt-6 md:p-8 container max-w-6xl mx-auto">
             {children}
         </main>
+        <WhatsAppFAB />
         <SiteFooter />
     </div>
   );

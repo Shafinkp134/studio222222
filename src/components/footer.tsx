@@ -24,12 +24,15 @@ export function SiteFooter() {
             .
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <Link href="/terms-and-conditions" className="text-sm text-muted-foreground hover:text-primary">
                 Terms & Conditions
             </Link>
             <Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary">
                 Privacy Policy
+            </Link>
+            <Link href="https://wa.me/918590814673" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary">
+                Support
             </Link>
             <div className="flex items-center gap-2">
                 <a href="https://github.com" target="_blank" rel="noreferrer">
