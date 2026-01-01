@@ -26,8 +26,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Order } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { updateOrderTransactionId } from '@/app/actions';
-import { Eye, CheckCircle, Loader2 } from 'lucide-react';
+import { updateOrderTransactionId, deleteOrder } from '@/app/actions';
+import { Eye, CheckCircle, Loader2, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 
 const statusVariant = {
@@ -81,7 +81,6 @@ export default function OrdersClient() {
     startTransition(async () => {
       try {
         await updateOrderTransactionId(selectedOrder.id, transactionId);
-        setSelectedOrder(null);
         toast({
           title: 'Success',
           description: 'Transaction ID updated.',
@@ -95,6 +94,27 @@ export default function OrdersClient() {
       }
     });
   };
+
+  const handleOrderCompletion = () => {
+    if (!selectedOrder) return;
+
+    startTransition(async () => {
+        try {
+            await deleteOrder(selectedOrder.id);
+            setSelectedOrder(null);
+            toast({
+                title: 'Order Completed',
+                description: 'The order has been successfully deleted.',
+            });
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Failed to complete the order.',
+                variant: 'destructive',
+            });
+        }
+    });
+  }
 
   if (loading) {
     return (
@@ -185,13 +205,19 @@ export default function OrdersClient() {
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedOrder(null)}>
-              Close
+          <DialogFooter className="sm:justify-between">
+            <Button onClick={handleOrderCompletion} disabled={isPending} variant="destructive">
+              {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+              Complete Order
             </Button>
-            <Button onClick={handleUpdateTransactionId} disabled={isPending}>
-              {isPending ? 'Saving...' : 'Save Transaction ID'}
-            </Button>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setSelectedOrder(null)}>
+                Close
+              </Button>
+              <Button onClick={handleUpdateTransactionId} disabled={isPending}>
+                {isPending ? 'Saving...' : 'Save Transaction ID'}
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -50,3 +50,14 @@ export async function updateOrderTransactionId(orderId: string, transactionId: s
     throw new Error('Could not update order.');
   }
 }
+
+export async function deleteOrder(orderId: string) {
+    try {
+        const orderRef = doc(db, 'orders', orderId);
+        await deleteDoc(orderRef);
+        revalidatePath('/orders');
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        throw new Error('Could not delete order.');
+    }
+}
