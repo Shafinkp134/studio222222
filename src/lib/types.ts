@@ -17,5 +17,6 @@ export type Order = {
   total: number;
   items: { productId: string; quantity: number; name: string }[];
   shippingAddress: string;
+  phone?: string;
   transactionId?: string;
 };

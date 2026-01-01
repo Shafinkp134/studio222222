@@ -14,12 +14,15 @@ import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [shippingAddress, setShippingAddress] = useState('');
+  const [phone, setPhone] = useState('');
+  const [transactionId, setTransactionId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -58,15 +61,17 @@ export default function ShopPage() {
     }
     setSelectedProduct(product);
     setShippingAddress('');
+    setPhone('');
+    setTransactionId('');
   };
   
   const handleConfirmOrder = async () => {
     if (!user || !selectedProduct) return;
 
-    if (!shippingAddress.trim()) {
+    if (!shippingAddress.trim() || !phone.trim()) {
         toast({
-            title: 'Shipping Address Required',
-            description: 'Please enter your shipping address.',
+            title: 'Missing Information',
+            description: 'Please fill out all required fields.',
             variant: 'destructive',
         });
         return;
@@ -82,6 +87,8 @@ export default function ShopPage() {
             total: selectedProduct.price,
             items: [{ productId: selectedProduct.id, name: selectedProduct.name, quantity: 1 }],
             shippingAddress: shippingAddress,
+            phone: phone,
+            transactionId: transactionId,
         };
 
         await addDoc(collection(db, 'orders'), newOrder);
@@ -166,6 +173,25 @@ export default function ShopPage() {
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
                     required
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                    id="phone"
+                    placeholder="Enter your phone number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="transactionId">Transaction ID (Optional)</Label>
+                <Input
+                    id="transactionId"
+                    placeholder="Enter transaction ID if you have one"
+                    value={transactionId}
+                    onChange={(e) => setTransactionId(e.target.value)}
                 />
             </div>
           </div>

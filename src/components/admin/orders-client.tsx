@@ -152,6 +152,10 @@ export default function OrdersClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+             <div className="space-y-1">
+              <p className="text-sm font-medium">Phone:</p>
+              <p className="text-sm text-muted-foreground">{selectedOrder?.phone || 'Not provided'}</p>
+            </div>
             <div className="space-y-1">
               <p className="text-sm font-medium">Items:</p>
               <ul className="text-sm text-muted-foreground list-disc pl-5">
