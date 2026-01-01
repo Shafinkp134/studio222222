@@ -3,7 +3,7 @@
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, LayoutDashboard } from 'lucide-react';
 import { AdminHeader } from '@/components/admin/header';
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
@@ -23,6 +23,12 @@ function UserHeader() {
             <Link href="/shop">
               <ShoppingBag className="mr-2 h-4 w-4" />
               Shop
+            </Link>
+          </Button>
+          <Button variant="ghost" asChild>
+            <Link href="/dashboard">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Admin Panel
             </Link>
           </Button>
           <AdminHeader />
