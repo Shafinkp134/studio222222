@@ -1,69 +1,13 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { collection, onSnapshot, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import type { Order } from '@/lib/types';
-import { Package, Users, DollarSign, Activity } from 'lucide-react';
-
-// Mock data, to be replaced by API calls to Firebase
-const mockStats = {
-  totalRevenue: 12345.67,
-  newOrders: 12,
-  newCustomers: 28,
-  totalProducts: 78,
-};
-
-const mockRecentOrders: Order[] = [
-  {
-    id: 'ORD001',
-    customerName: 'Olivia Martin',
-    customerEmail: 'olivia.martin@email.com',
-    date: '2023-11-23',
-    status: 'Delivered',
-    total: 42.99,
-    items: [],
-    shippingAddress: ''
-  },
-  {
-    id: 'ORD002',
-    customerName: 'Jackson Lee',
-    customerEmail: 'jackson.lee@email.com',
-    date: '2023-11-22',
-    status: 'Shipped',
-    total: 89.90,
-    items: [],
-    shippingAddress: ''
-  },
-  {
-    id: 'ORD003',
-    customerName: 'Isabella Nguyen',
-    customerEmail: 'isabella.nguyen@email.com',
-    date: '2023-11-21',
-    status: 'Pending',
-    total: 120.00,
-    items: [],
-    shippingAddress: ''
-  },
-  {
-    id: 'ORD004',
-    customerName: 'William Kim',
-    customerEmail: 'will@email.com',
-    date: '2023-11-20',
-    status: 'Delivered',
-    total: 75.50,
-    items: [],
-    shippingAddress: ''
-  },
-  {
-    id: 'ORD005',
-    customerName: 'Sophia Garcia',
-    customerEmail: 'sophia@email.com',
-    date: '2023-11-19',
-    status: 'Cancelled',
-    total: 30.00,
-    items: [],
-    shippingAddress: ''
-  },
-];
+import { Package, Users, DollarSign, Activity, Loader2 } from 'lucide-react';
 
 const statusVariant = {
   Delivered: 'default',
@@ -73,6 +17,71 @@ const statusVariant = {
 } as const;
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState({
+    totalRevenue: 0,
+    newOrders: 0,
+    newCustomers: 0,
+    totalProducts: 0,
+  });
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const productsCol = collection(db, 'products');
+    const ordersCol = collection(db, 'orders');
+
+    const unsubProducts = onSnapshot(productsCol, (snapshot) => {
+      setStats(prev => ({ ...prev, totalProducts: snapshot.size }));
+    });
+
+    const unsubOrders = onSnapshot(ordersCol, async (snapshot) => {
+      let totalRevenue = 0;
+      let newOrders = 0;
+      const customerEmails = new Set<string>();
+      
+      snapshot.forEach(doc => {
+        const order = doc.data() as Omit<Order, 'id'>;
+        if (order.status === 'Delivered') {
+          totalRevenue += order.total;
+        }
+        if (order.status === 'Pending') {
+          newOrders++;
+        }
+        if (order.customerEmail) {
+          customerEmails.add(order.customerEmail);
+        }
+      });
+      
+      setStats(prev => ({
+        ...prev,
+        totalRevenue,
+        newOrders,
+        newCustomers: customerEmails.size,
+      }));
+    });
+    
+    const recentOrdersQuery = query(ordersCol, orderBy('date', 'desc'), limit(5));
+    const unsubRecentOrders = onSnapshot(recentOrdersQuery, (snapshot) => {
+      const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+      setRecentOrders(orders);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubProducts();
+      unsubOrders();
+      unsubRecentOrders();
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -87,8 +96,8 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${mockStats.totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            <div className="text-2xl font-bold">${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <p className="text-xs text-muted-foreground">From delivered orders</p>
           </CardContent>
         </Card>
         <Card>
@@ -97,8 +106,8 @@ export default function DashboardPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+{mockStats.newOrders}</div>
-            <p className="text-xs text-muted-foreground">+15% from last month</p>
+            <div className="text-2xl font-bold">+{stats.newOrders}</div>
+            <p className="text-xs text-muted-foreground">Pending orders</p>
           </CardContent>
         </Card>
         <Card>
@@ -107,18 +116,18 @@ export default function DashboardPage() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStats.totalProducts}</div>
+            <div className="text-2xl font-bold">{stats.totalProducts}</div>
             <p className="text-xs text-muted-foreground">Total active products</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Customers</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+{mockStats.newCustomers}</div>
-            <p className="text-xs text-muted-foreground">+5 since last week</p>
+            <div className="text-2xl font-bold">{stats.newCustomers}</div>
+            <p className="text-xs text-muted-foreground">Based on order history</p>
           </CardContent>
         </Card>
       </div>
@@ -137,7 +146,7 @@ export default function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockRecentOrders.map((order) => (
+              {recentOrders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell>
                     <div className="font-medium">{order.customerName}</div>
