@@ -7,7 +7,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import type { Order } from '@/lib/types';
-import { Package, Users, DollarSign, Activity, Loader2 } from 'lucide-react';
+import { Package, Users, Activity, Loader2 } from 'lucide-react';
+
+// Using an inline SVG for the Rupee symbol as lucide-react doesn't have it.
+const RupeeSign = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M6 3h12" />
+      <path d="M6 8h12" />
+      <path d="m19 13-8 8-8-8" />
+      <path d="M11 13H5" />
+    </svg>
+);
+
 
 const statusVariant = {
   Delivered: 'default',
@@ -93,10 +104,10 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <RupeeSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
             <p className="text-xs text-muted-foreground">From delivered orders</p>
           </CardContent>
         </Card>
@@ -157,7 +168,7 @@ export default function DashboardPage() {
                   <TableCell>
                     <Badge variant={statusVariant[order.status]}>{order.status}</Badge>
                   </TableCell>
-                  <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -150,7 +150,7 @@ export default function OrdersClient() {
                   <TableCell className="hidden md:table-cell">
                     <Badge variant={statusVariant[order.status]}>{order.status}</Badge>
                   </TableCell>
-                  <TableCell>${order.total.toFixed(2)}</TableCell>
+                  <TableCell>₹{order.total.toFixed(2)}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => handleViewOrder(order)}>
                       <Eye className="h-4 w-4" />

@@ -45,13 +45,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { addProduct, updateProduct, deleteProduct } from '@/app/actions';
+import { addProduct, updateProduct, deleteProduct, getCloudinarySignature } from '@/app/actions';
 import { Edit, PlusCircle, Trash2, Loader2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '../ui/card';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Badge } from '../ui/badge';
+import { ScrollArea } from '../ui/scroll-area';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -136,10 +137,15 @@ export default function ProductsClient() {
         let imageUrl = data.imageUrl;
 
         if (selectedFile) {
+          const { signature, timestamp } = await getCloudinarySignature();
+          
           const formData = new FormData();
           formData.append('file', selectedFile);
+          formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY!);
+          formData.append('signature', signature);
+          formData.append('timestamp', timestamp.toString());
           formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!);
-
+          
           const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, {
             method: 'POST',
             body: formData,
@@ -235,7 +241,7 @@ export default function ProductsClient() {
                   <TableCell className="hidden md:table-cell">
                     <Badge variant="outline">{product.category}</Badge>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">${product.price.toFixed(2)}</TableCell>
+                  <TableCell className="hidden md:table-cell">₹{product.price.toFixed(2)}</TableCell>
                   <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -277,120 +283,122 @@ export default function ProductsClient() {
       
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{currentProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
             <DialogDescription>
               {currentProduct ? 'Update the details of your product.' : 'Fill in the details for the new product.'}
             </DialogDescription>
           </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="stock"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Stock</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormItem>
-                <FormLabel>Product Image</FormLabel>
-                <FormControl>
-                    <div className="flex items-center gap-4">
-                        <label htmlFor="file-upload" className="flex-1">
-                            <Button type="button" variant="outline" className="w-full" asChild>
-                                <span>
-                                    <Upload className="mr-2 h-4 w-4" />
-                                    {selectedFile ? "Change Image" : "Upload Image"}
-                                </span>
-                            </Button>
-                            <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
-                        </label>
-                        {previewUrl && (
-                            <Image src={previewUrl} alt="Product preview" width={64} height={64} className="rounded-md object-cover"/>
-                        )}
-                    </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-               <FormField
-                control={form.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem className="sr-only">
-                    <FormLabel>Image URL</FormLabel>
-                    <FormControl>
-                      <Input {...field} readOnly/>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? 'Saving...' : 'Save changes'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+          <ScrollArea className="max-h-[70vh] pr-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price (in ₹)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stock"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Stock</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormItem>
+                  <FormLabel>Product Image</FormLabel>
+                  <FormControl>
+                      <div className="flex items-center gap-4">
+                          <label htmlFor="file-upload" className="flex-1">
+                              <Button type="button" variant="outline" className="w-full" asChild>
+                                  <span>
+                                      <Upload className="mr-2 h-4 w-4" />
+                                      {selectedFile ? "Change Image" : "Upload Image"}
+                                  </span>
+                              </Button>
+                              <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
+                          </label>
+                          {previewUrl && (
+                              <Image src={previewUrl} alt="Product preview" width={64} height={64} className="rounded-md object-cover"/>
+                          )}
+                      </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+                <FormField
+                  control={form.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem className="sr-only">
+                      <FormLabel>Image URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} readOnly/>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter className="sticky bottom-0 bg-background pt-4 -mx-6 px-6 pb-0">
+                  <Button type="submit" disabled={isPending} className="w-full">
+                    {isPending ? 'Saving...' : 'Save changes'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </>

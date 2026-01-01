@@ -68,7 +68,7 @@ export default function ShopPage() {
             <CardContent className="pt-4 flex-1 flex flex-col">
               <CardTitle className="text-lg font-semibold mb-2">{product.name}</CardTitle>
               <p className="text-muted-foreground text-sm flex-1 line-clamp-3">{product.description}</p>
-              <p className="text-lg font-bold mt-4">${product.price.toFixed(2)}</p>
+              <p className="text-lg font-bold mt-4">₹{product.price.toFixed(2)}</p>
             </CardContent>
             <CardFooter>
               <Button className="w-full" asChild>

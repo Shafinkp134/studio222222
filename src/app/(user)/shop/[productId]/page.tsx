@@ -144,7 +144,7 @@ export default function ProductDetailPage() {
                 <div className="flex flex-col justify-center space-y-6">
                     <div>
                         <h1 className="text-3xl lg:text-4xl font-bold tracking-tight font-headline">{product.name}</h1>
-                        <p className="text-2xl font-bold mt-2">${product.price.toFixed(2)}</p>
+                        <p className="text-2xl font-bold mt-2">₹{product.price.toFixed(2)}</p>
                     </div>
                     <p className="text-lg text-muted-foreground">{product.description}</p>
                     <Button size="lg" className="mt-4" onClick={handlePlaceOrderClick}>
@@ -167,7 +167,7 @@ export default function ProductDetailPage() {
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
                 <h4 className="font-medium">{product?.name}</h4>
-                <p className="text-muted-foreground">${product?.price.toFixed(2)}</p>
+                <p className="text-muted-foreground">₹{product?.price.toFixed(2)}</p>
             </div>
             <div className="space-y-2">
                 <Label htmlFor="shipping-address">Shipping Address</Label>

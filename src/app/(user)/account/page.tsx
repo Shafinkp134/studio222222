@@ -135,7 +135,7 @@ export default function AccountPage() {
                     <TableCell>
                       <Badge variant={statusVariant[order.status]}>{order.status}</Badge>
                     </TableCell>
-                    <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
