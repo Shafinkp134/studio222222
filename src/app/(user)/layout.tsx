@@ -14,7 +14,7 @@ import { SiteFooter } from '@/components/footer';
 import WhatsAppFAB from '@/components/whatsapp-fab';
 import PromoBanner from '@/components/promo-banner';
 
-const ADMIN_EMAIL = 'admin@gmail.com';
+const ADMIN_EMAIL = 'admin1@gmail.com';
 
 function UserHeader() {
   const [open, setOpen] = useState(false);
