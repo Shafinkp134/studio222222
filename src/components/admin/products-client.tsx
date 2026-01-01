@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Table,
@@ -18,7 +18,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -32,7 +31,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { Product } from '@/lib/types';
 import { useForm } from 'react-hook-form';
@@ -48,9 +46,11 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { addProduct, updateProduct, deleteProduct } from '@/app/actions';
-import { Edit, PlusCircle, Trash2 } from 'lucide-react';
+import { Edit, PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '../ui/card';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -62,13 +62,35 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-export default function ProductsClient({ initialProducts }: { initialProducts: Product[] }) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+export default function ProductsClient() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
+      const productsList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Product[];
+      setProducts(productsList);
+      setLoading(false);
+    }, (error) => {
+      console.error("Failed to fetch products in real-time:", error);
+      toast({
+        title: 'Error',
+        description: 'Could not fetch products. Please try again later.',
+        variant: 'destructive',
+      });
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [toast]);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -102,7 +124,6 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
           toast({ title: 'Success', description: 'Product added successfully.' });
         }
         setDialogOpen(false);
-        router.refresh();
       } catch (error) {
         toast({
           title: 'Error',
@@ -117,9 +138,7 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
     startTransition(async () => {
       try {
         await deleteProduct(productId);
-        setProducts(products.filter((p) => p.id !== productId));
         toast({ title: 'Success', description: 'Product deleted successfully.' });
-        router.refresh();
       } catch (error) {
         toast({
           title: 'Error',
@@ -129,6 +148,14 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
       }
     });
   };
+  
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -140,7 +167,7 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
       </div>
 
       <Card>
-        <CardContent>
+        <CardContent className="pt-6">
           <Table>
             <TableHeader>
               <TableRow>

@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import {
   Table,
   TableBody,
@@ -25,7 +27,7 @@ import { Label } from '@/components/ui/label';
 import type { Order } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { updateOrderTransactionId } from '@/app/actions';
-import { Eye, CheckCircle } from 'lucide-react';
+import { Eye, CheckCircle, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 
 const statusVariant = {
@@ -35,13 +37,38 @@ const statusVariant = {
   Cancelled: 'destructive',
 } as const;
 
-export default function OrdersClient({ initialOrders }: { initialOrders: Order[] }) {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+export default function OrdersClient() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [transactionId, setTransactionId] = useState('');
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const ordersCol = collection(db, 'orders');
+    const q = query(ordersCol, orderBy('date', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const ordersList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Order[];
+      setOrders(ordersList);
+      setLoading(false);
+    }, (error) => {
+      console.error("Failed to fetch orders in real-time:", error);
+      toast({
+        title: 'Error',
+        description: 'Could not fetch orders. Please try again later.',
+        variant: 'destructive',
+      });
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [toast]);
+
 
   const handleViewOrder = (order: Order) => {
     setSelectedOrder(order);
@@ -54,16 +81,11 @@ export default function OrdersClient({ initialOrders }: { initialOrders: Order[]
     startTransition(async () => {
       try {
         await updateOrderTransactionId(selectedOrder.id, transactionId);
-        const updatedOrders = orders.map((o) =>
-          o.id === selectedOrder.id ? { ...o, transactionId } : o
-        );
-        setOrders(updatedOrders);
         setSelectedOrder(null);
         toast({
           title: 'Success',
           description: 'Transaction ID updated.',
         });
-        router.refresh();
       } catch (error) {
         toast({
           title: 'Error',
@@ -74,10 +96,18 @@ export default function OrdersClient({ initialOrders }: { initialOrders: Order[]
     });
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <>
       <Card>
-        <CardContent>
+        <CardContent className="pt-6">
           <Table>
             <TableHeader>
               <TableRow>
