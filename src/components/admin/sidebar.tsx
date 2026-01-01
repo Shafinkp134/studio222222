@@ -5,12 +5,13 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
-import { LayoutGrid, Gift, ClipboardList } from 'lucide-react';
+import { LayoutGrid, Gift, ClipboardList, Users } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { href: '/products', label: 'Products', icon: Gift },
   { href: '/orders', label: 'Orders', icon: ClipboardList },
+  { href: '/users', label: 'Users', icon: Users },
 ];
 
 export function AdminSidebar() {
