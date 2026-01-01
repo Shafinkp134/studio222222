@@ -99,7 +99,7 @@ export function AdminHeader() {
   }
 
   return (
-    <header className={cn("sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6", isAdminRoute ? 'justify-between md:justify-end' : 'justify-end')}>
+    <header className={cn("flex h-14 items-center gap-4", isAdminRoute ? 'justify-between md:justify-end sticky top-0 z-30 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6' : 'justify-end')}>
        {isAdminRoute && (
         <div className="md:hidden">
             <MobileNav />

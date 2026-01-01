@@ -100,6 +100,9 @@ export default function AccountPage() {
             <p className="text-xl font-semibold">{user.displayName || 'No name provided'}</p>
             <p className="text-muted-foreground">{user.email}</p>
           </div>
+          <Button onClick={handleSignOut} variant="outline" className="ml-auto">
+            Sign Out
+          </Button>
         </CardContent>
       </Card>
 
