@@ -122,7 +122,7 @@ export default function OrdersClient() {
             <TableBody>
               {orders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
+                  <TableCell className="font-medium">{order.id.substring(0, 7)}...</TableCell>
                   <TableCell>{order.customerName}</TableCell>
                   <TableCell className="hidden md:table-cell">
                     {new Date(order.date).toLocaleDateString()}
@@ -146,7 +146,7 @@ export default function OrdersClient() {
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Order Details - {selectedOrder?.id}</DialogTitle>
+            <DialogTitle>Order Details - {selectedOrder?.id.substring(0,7)}...</DialogTitle>
             <DialogDescription>
               Customer: {selectedOrder?.customerName} ({selectedOrder?.customerEmail})
             </DialogDescription>
