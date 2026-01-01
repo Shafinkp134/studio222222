@@ -26,7 +26,7 @@ function UserHeader() {
       <div className="container flex h-16 items-center justify-between">
         <Link href="/shop" className="flex items-center gap-2 font-headline text-lg font-semibold">
           <Logo className="h-6 w-6 text-primary" />
-          <span>Gift Admin Pro</span>
+          <span>MRSHOPY</span>
         </Link>
         <div className="hidden items-center gap-4 md:flex">
           <Button variant={pathname === '/shop' ? 'secondary' : 'ghost'} asChild>
@@ -61,7 +61,7 @@ function UserHeader() {
                 <nav className="grid gap-6 text-lg font-medium">
                     <Link href="/shop" className="flex items-center gap-2 font-headline text-lg font-semibold mb-4">
                         <Logo className="h-6 w-6 text-primary" />
-                        <span>Gift Admin Pro</span>
+                        <span>MRSHOPY</span>
                     </Link>
                     <Link href="/shop" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname === '/shop' && 'bg-muted text-primary')}>
                       <ShoppingBag className="h-4 w-4" />

@@ -5,8 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'Gift Admin Pro',
-  description: 'Admin panel for managing your gift shop',
+  title: 'MRSHOPY',
+  description: 'Your one-stop shop for everything',
 };
 
 export default function RootLayout({

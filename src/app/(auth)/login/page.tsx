@@ -113,8 +113,8 @@ export default function LoginPage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary">
             <Logo className="h-8 w-8" />
           </div>
-          <CardTitle className="font-headline text-3xl">Gift Admin Pro</CardTitle>
-          <CardDescription>Administrator Login</CardDescription>
+          <CardTitle className="font-headline text-3xl">MRSHOPY</CardTitle>
+          <CardDescription>Login to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">

@@ -21,7 +21,7 @@ export function AdminSidebar() {
       <div className="flex h-16 items-center border-b px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
           <Logo className="h-6 w-6 text-primary" />
-          <span>Gift Admin Pro</span>
+          <span>MRSHOPY</span>
         </Link>
       </div>
       <nav className="flex-1 space-y-2 p-4">

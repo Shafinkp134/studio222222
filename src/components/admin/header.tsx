@@ -45,7 +45,7 @@ function MobileNav() {
                 <nav className="grid gap-6 text-lg font-medium">
                     <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
                         <Logo className="h-6 w-6 text-primary" />
-                        <span>Gift Admin Pro</span>
+                        <span>MRSHOPY</span>
                     </Link>
                     {navItems.map((item) => (
                       <Link
