@@ -25,7 +25,7 @@ function UserHeader() {
   const pathname = usePathname();
   const { user } = useAuth();
   const isAdmin = user?.email === ADMIN_EMAIL;
-  const [siteSettings, setSiteSettings] = useState<{name: string, logoUrl: string}>({name: 'MRSHOPY', logoUrl: ''});
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({name: 'MRSHOPY', logoUrl: ''});
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "settings", "siteInfo"), (doc) => {
@@ -124,6 +124,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({name: 'MRSHOPY', logoUrl: ''});
 
   useEffect(() => {
     // Only protect the /account route in this layout
@@ -131,6 +132,15 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
       router.replace('/login');
     }
   }, [user, loading, router, pathname]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "siteInfo"), (doc) => {
+      if (doc.exists()) {
+        setSiteSettings(doc.data() as SiteSettings);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   // For /account page, show loader until auth state is resolved
   if (pathname === '/account' && loading) {
@@ -156,7 +166,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
             {children}
         </main>
         <WhatsAppFAB />
-        <SiteFooter />
+        <SiteFooter siteSettings={siteSettings} />
     </div>
   );
 }

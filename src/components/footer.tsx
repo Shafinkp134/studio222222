@@ -1,23 +1,13 @@
 import Link from 'next/link';
 import { Logo } from './logo';
 import { Instagram } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import type { SiteSettings } from '@/lib/types';
 
+type SiteFooterProps = {
+  siteSettings: SiteSettings;
+};
 
-async function getSiteSettings() {
-  const docRef = doc(db, 'settings', 'siteInfo');
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    return docSnap.data() as SiteSettings;
-  }
-  return { name: 'MRSHOPY', logoUrl: 'https://res.cloudinary.com/ddqzzqnjh/image/upload/v1767286657/hbn0rm8hof8mre3zu0dk.png' };
-}
-
-export async function SiteFooter() {
-  const siteSettings = await getSiteSettings();
-
+export function SiteFooter({ siteSettings }: SiteFooterProps) {
   return (
     <footer className="w-full border-t bg-background">
       <div className="container mx-auto flex flex-col items-center justify-between gap-6 py-10 md:h-24 md:flex-row md:py-0">
