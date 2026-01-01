@@ -7,16 +7,26 @@ import { Loader2 } from 'lucide-react';
 import { AdminHeader } from '@/components/admin/header';
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { ShoppingBag } from 'lucide-react';
 
 function UserHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
+        <Link href="/shop" className="flex items-center gap-2 font-headline text-lg font-semibold">
           <Logo className="h-6 w-6 text-primary" />
           <span>Gift Admin Pro</span>
         </Link>
-        <AdminHeader />
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" asChild>
+            <Link href="/shop">
+              <ShoppingBag className="mr-2 h-4 w-4" />
+              Shop
+            </Link>
+          </Button>
+          <AdminHeader />
+        </div>
       </div>
     </header>
   );
@@ -43,7 +53,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="flex min-h-screen w-full flex-col">
         <UserHeader />
-        <main className="flex-1 p-4 pt-6 md:p-8 container max-w-4xl mx-auto">
+        <main className="flex-1 p-4 pt-6 md:p-8 container max-w-6xl mx-auto">
             {children}
         </main>
     </div>

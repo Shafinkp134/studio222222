@@ -40,7 +40,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/dashboard');
+      router.replace('/shop');
     }
   }, [user, loading, router]);
 
@@ -48,7 +48,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await signInWithPopup(auth, googleProvider);
-      router.push('/dashboard');
+      router.push('/shop');
     } catch (error) {
       console.error('Error signing in with Google: ', error);
       toast({
@@ -66,7 +66,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await createUserWithEmailAndPassword(auth, registerEmail, registerPassword);
-      router.push('/dashboard');
+      router.push('/shop');
     } catch (error: any) {
       console.error('Error signing up with email and password: ', error);
       toast({
@@ -84,7 +84,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
-      router.push('/dashboard');
+      router.push('/shop');
     } catch (error: any) {
       console.error('Error signing in with email and password: ', error);
       toast({
