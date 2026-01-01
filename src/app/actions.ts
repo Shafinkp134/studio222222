@@ -41,6 +41,40 @@ export async function deleteProduct(productId: string) {
   }
 }
 
+export async function uploadImage(formData: FormData): Promise<{ secure_url: string } | { error: string }> {
+    const file = formData.get('file') as File;
+    if (!file) {
+        return { error: 'No file provided.' };
+    }
+
+    const cloudName = 'ddqzzqnjh';
+    const uploadPreset = 'ml_default';
+
+    const newFormData = new FormData();
+    newFormData.append('file', file);
+    newFormData.append('upload_preset', uploadPreset);
+
+    try {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+            method: 'POST',
+            body: newFormData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Cloudinary upload error:', errorData);
+            return { error: `Image upload failed: ${errorData.error.message}` };
+        }
+
+        const data = await response.json();
+        return { secure_url: data.secure_url };
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        return { error: 'An unknown error occurred during image upload.' };
+    }
+}
+
+
 // Order Actions
 export async function updateOrderTransactionId(orderId: string, transactionId: string) {
   try {

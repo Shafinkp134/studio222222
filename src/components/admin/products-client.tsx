@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Table,
@@ -45,8 +45,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { addProduct, updateProduct, deleteProduct } from '@/app/actions';
-import { Edit, PlusCircle, Trash2, Loader2 } from 'lucide-react';
+import { addProduct, updateProduct, deleteProduct, uploadImage } from '@/app/actions';
+import { Edit, PlusCircle, Trash2, Loader2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '../ui/card';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -69,10 +69,12 @@ export default function ProductsClient() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const [isUploading, setIsUploading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const router = useRouter();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
@@ -115,6 +117,32 @@ export default function ProductsClient() {
       form.reset({ name: '', description: '', price: 0, stock: 0, imageUrl: '', category: '' });
     }
     setDialogOpen(true);
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const result = await uploadImage(formData);
+
+    if ('error' in result) {
+        toast({
+            title: 'Upload Failed',
+            description: result.error,
+            variant: 'destructive',
+        });
+    } else {
+        form.setValue('imageUrl', result.secure_url, { shouldValidate: true });
+        toast({
+            title: 'Upload Successful',
+            description: 'Image URL has been updated.',
+        });
+    }
+    setIsUploading(false);
   };
 
   const onSubmit = (data: ProductFormData) => {
@@ -322,17 +350,37 @@ export default function ProductsClient() {
                   name="imageUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Image URL</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
+                        <FormLabel>Image URL</FormLabel>
+                        <div className="flex items-center gap-2">
+                            <FormControl>
+                                <Input {...field} />
+                            </FormControl>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isUploading}
+                                className="shrink-0"
+                            >
+                                {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                                <span className="sr-only">Upload Image</span>
+                            </Button>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
+                                className="hidden"
+                                accept="image/*"
+                            />
+                        </div>
+                        <FormMessage />
                     </FormItem>
                   )}
                 />
                 <DialogFooter className="sticky bottom-0 bg-background pt-4 -mx-6 px-6 pb-0">
-                  <Button type="submit" disabled={isPending} className="w-full">
-                    {isPending ? 'Saving...' : 'Save changes'}
+                  <Button type="submit" disabled={isPending || isUploading} className="w-full">
+                    {(isPending || isUploading) ? 'Saving...' : 'Save changes'}
                   </Button>
                 </DialogFooter>
               </form>
