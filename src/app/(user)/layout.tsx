@@ -8,7 +8,7 @@ import { AdminHeader } from '@/components/admin/header';
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription, SheetHeader } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
 
@@ -98,12 +98,16 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   }, [user, loading, router, pathname]);
 
   // For /account page, show loader until auth state is resolved
-  if (pathname === '/account' && (loading || !user)) {
+  if (pathname === '/account' && loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
+  
+  if (pathname === '/account' && !user) {
+    return null;
   }
 
   // For other pages like /shop, render immediately
