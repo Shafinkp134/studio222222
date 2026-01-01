@@ -50,8 +50,7 @@ import { Edit, PlusCircle, Trash2, Loader2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '../ui/card';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { db, storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db } from '@/lib/firebase';
 import { Badge } from '../ui/badge';
 
 const productSchema = z.object({
@@ -114,7 +113,7 @@ export default function ProductsClient() {
       const file = e.target.files[0];
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
-      form.setValue('imageUrl', URL.createObjectURL(file), { shouldValidate: true }); // temporary url for validation
+      form.setValue('imageUrl', 'https://placeholder.com/image.jpg', { shouldValidate: true }); // temporary url for validation
     }
   };
 
@@ -137,9 +136,21 @@ export default function ProductsClient() {
         let imageUrl = data.imageUrl;
 
         if (selectedFile) {
-          const storageRef = ref(storage, `products/${Date.now()}_${selectedFile.name}`);
-          const uploadResult = await uploadBytes(storageRef, selectedFile);
-          imageUrl = await getDownloadURL(uploadResult.ref);
+          const formData = new FormData();
+          formData.append('file', selectedFile);
+          formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!);
+
+          const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error('Image upload failed');
+          }
+          
+          const cloudinaryData = await uploadResponse.json();
+          imageUrl = cloudinaryData.secure_url;
         }
 
         const productData = { ...data, imageUrl };
