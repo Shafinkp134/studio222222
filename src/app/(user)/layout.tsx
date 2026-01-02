@@ -3,7 +3,7 @@
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Loader2, LayoutDashboard, Menu, ShoppingBag, User as UserIcon } from 'lucide-react';
+import { Loader2, LayoutDashboard, Menu, ShoppingBag, User as UserIcon, Briefcase } from 'lucide-react';
 import { AdminHeader } from '@/components/admin/header';
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
@@ -19,12 +19,14 @@ import type { SiteSettings } from '@/lib/types';
 
 
 const ADMIN_EMAIL = 'admin1@gmail.com';
+const STAFF_USERS = ['shafinkp444@gmail.com'];
 
 function UserHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const { user } = useAuth();
   const isAdmin = user?.email === ADMIN_EMAIL;
+  const isStaff = user?.email && STAFF_USERS.includes(user.email);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({name: 'MRSHOPY', logoUrl: ''});
 
   useEffect(() => {
@@ -69,6 +71,14 @@ function UserHeader() {
                     </Link>
                 </Button>
               )}
+              {isStaff && (
+                <Button variant={pathname.startsWith('/staff') ? 'secondary' : 'ghost'} asChild>
+                    <Link href="/staff/products">
+                        <Briefcase className="mr-2 h-4 w-4" />
+                        Staff Panel
+                    </Link>
+                </Button>
+              )}
             </>
           )}
           <AdminHeader />
@@ -105,6 +115,12 @@ function UserHeader() {
                               <Link href="/admin/dashboard" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname.startsWith('/admin') && 'bg-muted text-primary')}>
                                   <LayoutDashboard className="h-4 w-4" />
                                   Admin Panel
+                              </Link>
+                            )}
+                             {isStaff && (
+                              <Link href="/staff/products" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname.startsWith('/staff') && 'bg-muted text-primary')}>
+                                  <Briefcase className="h-4 w-4" />
+                                  Staff Panel
                               </Link>
                             )}
                         </>
