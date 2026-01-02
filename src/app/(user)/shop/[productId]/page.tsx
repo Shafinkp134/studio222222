@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase';
 import type { Product, Order, UserProfile, Address } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Loader2, ShoppingCart, Gift, Star } from 'lucide-react';
+import { Loader2, ShoppingCart, Gift, Star, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter, useParams } from 'next/navigation';
@@ -21,6 +21,8 @@ import { getUserProfile, updateUserProfile } from '@/app/actions';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
 
 const GIFT_WRAP_COST = 15;
 
@@ -48,6 +50,7 @@ export default function ProductDetailPage() {
   const [customerNotes, setCustomerNotes] = useState('');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [loginEmail, setLoginEmail] = useState('');
 
   const { toast } = useToast();
   const { user } = useAuth();
@@ -125,10 +128,12 @@ export default function ProductDetailPage() {
       const userProfile = await getUserProfile(user.uid);
       setShippingAddress(userProfile?.shippingAddress || { ...initialAddressState, fullName: user.displayName || '' });
       setPhone(userProfile?.phone || '');
+      setLoginEmail(user.email || '');
     } else {
       // Reset form if no user is logged in
       setShippingAddress(initialAddressState);
       setPhone('');
+      setLoginEmail('');
     }
 
     setIsOrderDialogOpen(true);
@@ -139,10 +144,10 @@ export default function ProductDetailPage() {
   const handleConfirmOrder = async () => {
     if (!product) return;
 
-    if (!shippingAddress.fullName || !shippingAddress.houseName || !shippingAddress.city || !shippingAddress.state || !shippingAddress.panjayath || !phone.trim()) {
+    if (!shippingAddress.fullName || !shippingAddress.houseName || !shippingAddress.city || !shippingAddress.state || !shippingAddress.panjayath || !phone.trim() || !loginEmail.trim()) {
         toast({
             title: 'Missing Information',
-            description: 'Please fill out all required fields.',
+            description: 'Please fill out all required fields, including your email.',
             variant: 'destructive',
         });
         return;
@@ -154,14 +159,13 @@ export default function ProductDetailPage() {
 
         const newOrder: Omit<Order, 'id'> = {
             customerName: shippingAddress.fullName || 'Anonymous',
-            customerEmail: user?.email || 'guest-order',
+            customerEmail: loginEmail,
             date: new Date().toISOString(),
             status: 'Pending',
             total: total,
             items: [{ productId: product.id, name: product.name, quantity: 1 }],
             shippingAddress: shippingAddress,
             phone: phone,
-            transactionId: '', // Set as empty for Cash on Delivery
             giftWrap: giftWrap,
             customerNotes: customerNotes,
         };
@@ -288,6 +292,15 @@ export default function ProductDetailPage() {
           </DialogHeader>
           <ScrollArea className="max-h-[70vh] pr-6">
             <div className="grid gap-4 py-4">
+                 {!user && (
+                    <Alert>
+                        <Info className="h-4 w-4" />
+                        <AlertTitle>ശ്രദ്ധിക്കുക</AlertTitle>
+                        <AlertDescription>
+                        നിങ്ങൾ ഓർഡർ ചെയ്യുമ്പോൾ കൊടുത്ത മെയിൽ വഴി ലോഗിൻ ചെയ്താൽ മാത്രം നിങ്ങൾക്ക് പ്രോഡക്റ്റ് അപ്ഡേറ്റ്സ് കാണാൻ കഴിയും.
+                        </AlertDescription>
+                    </Alert>
+                 )}
                 <div className="space-y-2">
                     <h4 className="font-medium">{product?.name}</h4>
                     <div className="flex justify-between items-center">
@@ -307,6 +320,10 @@ export default function ProductDetailPage() {
                 <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name</Label>
                     <Input id="fullName" name="fullName" value={shippingAddress.fullName} onChange={handleAddressChange} required />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required disabled={!!user} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
