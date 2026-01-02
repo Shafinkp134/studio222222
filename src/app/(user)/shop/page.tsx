@@ -1,20 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Product } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Loader2, Eye } from 'lucide-react';
+import { Loader2, Eye, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
@@ -37,6 +39,18 @@ export default function ShopPage() {
     return () => unsubscribe();
   }, [toast]);
 
+  const filteredProducts = useMemo(() => {
+    const searchQuery = searchParams.get('q')?.toLowerCase() || '';
+    const categoryQuery = searchParams.get('category') || '';
+
+    return products.filter(product => {
+      const nameMatch = product.name.toLowerCase().includes(searchQuery);
+      const descriptionMatch = product.description.toLowerCase().includes(searchQuery);
+      const categoryMatch = !categoryQuery || product.category === categoryQuery;
+      
+      return (nameMatch || descriptionMatch) && categoryMatch;
+    });
+  }, [products, searchParams]);
 
   if (loading) {
     return (
@@ -52,35 +66,44 @@ export default function ShopPage() {
         <h1 className="text-3xl font-bold tracking-tight font-headline">Shop</h1>
         <p className="text-muted-foreground">Browse our collection of wonderful gifts.</p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <Card key={product.id} className="flex flex-col">
-            <CardHeader className="p-0">
-               <Link href={`/shop/${product.id}`} className="block relative aspect-[4/3] w-full">
-                <Image
-                  src={product.imageUrl}
-                  alt={product.name}
-                  fill
-                  className="rounded-t-lg object-cover"
-                />
-              </Link>
-            </CardHeader>
-            <CardContent className="pt-4 flex-1 flex flex-col">
-              <CardTitle className="text-lg font-semibold mb-2">{product.name}</CardTitle>
-              <p className="text-muted-foreground text-sm flex-1 line-clamp-3">{product.description}</p>
-              <p className="text-lg font-bold mt-4">₹{product.price.toFixed(2)}</p>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full" asChild>
-                <Link href={`/shop/${product.id}`}>
-                  <Eye className="mr-2 h-4 w-4" />
-                  View Details
+
+      {filteredProducts.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {filteredProducts.map((product) => (
+            <Card key={product.id} className="flex flex-col">
+              <CardHeader className="p-0">
+                <Link href={`/shop/${product.id}`} className="block relative aspect-[4/3] w-full">
+                  <Image
+                    src={product.imageUrl}
+                    alt={product.name}
+                    fill
+                    className="rounded-t-lg object-cover"
+                  />
                 </Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+              </CardHeader>
+              <CardContent className="pt-4 flex-1 flex flex-col">
+                <CardTitle className="text-lg font-semibold mb-2">{product.name}</CardTitle>
+                <p className="text-muted-foreground text-sm flex-1 line-clamp-3">{product.description}</p>
+                <p className="text-lg font-bold mt-4">₹{product.price.toFixed(2)}</p>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full" asChild>
+                  <Link href={`/shop/${product.id}`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Details
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-64 text-center">
+            <Search className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-xl font-semibold">No Products Found</h3>
+            <p className="text-muted-foreground">Your search or filter returned no results. Try a different one.</p>
+        </div>
+      )}
     </div>
   );
 }

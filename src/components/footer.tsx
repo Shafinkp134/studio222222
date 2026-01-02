@@ -30,6 +30,9 @@ export function SiteFooter({ siteSettings }: SiteFooterProps) {
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+            <Link href="/about" className="text-sm text-muted-foreground hover:text-primary">
+                About Us
+            </Link>
             <Link href="/terms-and-conditions" className="text-sm text-muted-foreground hover:text-primary">
                 Terms & Conditions
             </Link>
