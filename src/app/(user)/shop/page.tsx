@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Product } from '@/lib/types';
@@ -63,8 +63,7 @@ function CategorySidebar({ categories, activeCategory }: { categories: string[],
   );
 }
 
-
-export default function ShopPage() {
+function ShopPageContents() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -168,4 +167,20 @@ export default function ShopPage() {
       </main>
     </div>
   );
+}
+
+function ShopPageLoading() {
+  return (
+    <div className="flex justify-center items-center h-64">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  )
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={<ShopPageLoading />}>
+      <ShopPageContents />
+    </Suspense>
+  )
 }
