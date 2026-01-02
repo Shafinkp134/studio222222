@@ -18,6 +18,11 @@ export default function ShippingPolicyPage() {
           Shipping charges for your order will be calculated and displayed at checkout. For our Cash on Delivery (COD) service, a nominal fee might be applied. Delivery delays can occasionally occur.
         </p>
 
+        <h2 className="mt-6 mb-2 text-2xl font-semibold">Delivery Location</h2>
+        <p className="mb-4">
+          Please note that delivery will only be made to the nearest courier office. You will be required to collect your package from there.
+        </p>
+
         <h2 className="mt-6 mb-2 text-2xl font-semibold">Shipment confirmation & Order tracking</h2>
         <p className="mb-4">
           You will receive a Shipment Confirmation email once your order has shipped containing your tracking number(s). The tracking number will be active within 24 hours.
