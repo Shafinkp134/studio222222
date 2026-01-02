@@ -4,7 +4,7 @@
 import { useAuth } from '@/hooks/use-auth';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
-import { Loader2, LayoutDashboard, Menu, ShoppingBag, User as UserIcon, Briefcase, Search, Store, Info, Phone, MessageSquareQuestion } from 'lucide-react';
+import { Loader2, LayoutDashboard, Menu, ShoppingBag, User as UserIcon, Briefcase, Search, Store, Info, Phone, MessageSquareQuote } from 'lucide-react';
 import { AdminHeader } from '@/components/admin/header';
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
@@ -160,7 +160,7 @@ export function UserHeader() {
                           Contact Us
                         </Link>
                          <Link href="/faq" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname === '/faq' && 'bg-muted text-primary')}>
-                          <MessageSquareQuestion className="h-4 w-4" />
+                          <MessageSquareQuote className="h-4 w-4" />
                           FAQ
                         </Link>
                         {user && (
