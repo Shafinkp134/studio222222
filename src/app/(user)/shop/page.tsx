@@ -8,44 +8,56 @@ import type { Product } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Loader2, Eye, Search } from 'lucide-react';
+import { Loader2, Eye, Search, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 function CategorySidebar({ categories, activeCategory }: { categories: string[], activeCategory: string | null }) {
+  const [isOpen, setIsOpen] = useState(true);
   return (
     <aside className="w-full md:w-64 lg:w-72">
       <Card>
-        <CardHeader>
-          <CardTitle>Categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <nav className="flex flex-col gap-2">
-            <Link
-              href="/shop"
-              className={cn(
-                'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                !activeCategory ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
-              )}
-            >
-              All Categories
-            </Link>
-            {categories.map(category => (
-              <Link
-                key={category}
-                href={`/shop?category=${encodeURIComponent(category)}`}
-                className={cn(
-                  'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  activeCategory === category ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
-                )}
-              >
-                {category}
-              </Link>
-            ))}
-          </nav>
-        </CardContent>
+        <Collapsible
+          open={isOpen}
+          onOpenChange={setIsOpen}
+        >
+          <CollapsibleTrigger asChild>
+            <CardHeader className="flex cursor-pointer flex-row items-center justify-between">
+              <CardTitle>Categories</CardTitle>
+              <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <nav className="flex flex-col gap-2">
+                <Link
+                  href="/shop"
+                  className={cn(
+                    'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    !activeCategory ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+                  )}
+                >
+                  All Categories
+                </Link>
+                {categories.map(category => (
+                  <Link
+                    key={category}
+                    href={`/shop?category=${encodeURIComponent(category)}`}
+                    className={cn(
+                      'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                      activeCategory === category ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+                    )}
+                  >
+                    {category}
+                  </Link>
+                ))}
+              </nav>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
     </aside>
   );
