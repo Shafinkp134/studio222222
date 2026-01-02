@@ -14,7 +14,6 @@ import { collection, onSnapshot, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { SiteSettings, Product } from '@/lib/types';
 import { Input } from '@/components/ui/input';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const ADMIN_EMAIL = 'admin1@gmail.com';
 const STAFF_USERS = ['shafinkp444@gmail.com', 'staff1@gmail.com'];
@@ -22,14 +21,23 @@ const STAFF_USERS = ['shafinkp444@gmail.com', 'staff1@gmail.com'];
 function SearchBar() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const pathname = usePathname();
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
+        const params = new URLSearchParams(searchParams);
         if (searchQuery.trim()) {
-            router.push(`/shop?q=${searchQuery.trim()}`);
+            params.set('q', searchQuery.trim());
         } else {
-            router.push('/shop');
+            params.delete('q');
+        }
+        
+        // If we are not on the shop page, navigate to it with the query
+        if(pathname !== '/shop') {
+            router.push(`/shop?${params.toString()}`);
+        } else {
+            router.replace(`/shop?${params.toString()}`);
         }
     };
 
@@ -49,39 +57,6 @@ function SearchBar() {
     );
 }
 
-function CategoryFilter({ categories }: { categories: string[] }) {
-    const router = useRouter();
-
-    const handleCategorySelect = (category: string | null) => {
-        if (category) {
-            router.push(`/shop?category=${category}`);
-        } else {
-            router.push('/shop');
-        }
-    };
-
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    Categories
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => handleCategorySelect(null)}>All Categories</DropdownMenuItem>
-                {categories.map((category) => (
-                    <DropdownMenuItem key={category} onSelect={() => handleCategorySelect(category)}>
-                        {category}
-                    </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-}
-
-
 export function UserHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -89,8 +64,6 @@ export function UserHeader() {
   const isAdmin = user?.email === ADMIN_EMAIL;
   const isStaff = user?.email && STAFF_USERS.includes(user.email);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({name: 'MRSHOPY', logoUrl: ''});
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubSettings = onSnapshot(doc(db, "settings", "siteInfo"), (doc) => {
@@ -98,24 +71,11 @@ export function UserHeader() {
         setSiteSettings(doc.data() as SiteSettings);
       }
     });
-    
-    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
-        const productsList = snapshot.docs.map(doc => doc.data() as Product);
-        setProducts(productsList);
-        setLoading(false);
-    });
 
     return () => {
         unsubSettings();
-        unsubProducts();
     };
   }, []);
-  
-  const categories = useMemo(() => {
-    const uniqueCategories = new Set(products.map(p => p.category));
-    return Array.from(uniqueCategories);
-  }, [products]);
-
 
   useEffect(() => {
     setOpen(false);
@@ -128,12 +88,9 @@ export function UserHeader() {
           <span className="hidden sm:inline-block">{siteSettings.name}</span>
         </Link>
         
-        {pathname.startsWith('/shop') && (
-            <div className="order-3 w-full md:order-2 md:w-auto flex-1 md:max-w-md lg:max-w-lg flex items-center gap-2">
-                <SearchBar />
-                <CategoryFilter categories={categories} />
-            </div>
-        )}
+        <div className="order-3 w-full md:order-2 md:w-auto flex-1 md:max-w-md lg:max-w-lg flex items-center gap-2">
+            <SearchBar />
+        </div>
 
         <div className="order-2 flex items-center gap-2 md:order-3 md:gap-4">
             <div className="hidden items-center gap-4 md:flex">
