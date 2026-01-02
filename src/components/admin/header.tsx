@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User as UserIcon, Menu, LayoutGrid, Gift, ClipboardList, LogIn, Users, Megaphone, Settings } from 'lucide-react';
+import { LogOut, User as UserIcon, Menu, LayoutGrid, Gift, ClipboardList, LogIn, Users, Megaphone, Settings, Store } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth, db } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -32,6 +32,7 @@ const navItems = [
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/banner', label: 'Banner', icon: Megaphone },
   { href: '/admin/settings', label: 'Site Settings', icon: Settings },
+  { href: '/admin/shopy', label: 'Shopy', icon: Store },
 ];
 
 function MobileNav() {

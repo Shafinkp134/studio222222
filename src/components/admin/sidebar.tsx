@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
-import { LayoutGrid, Gift, ClipboardList, Users, Megaphone, Settings } from 'lucide-react';
+import { LayoutGrid, Gift, ClipboardList, Users, Megaphone, Settings, Store } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -19,6 +19,7 @@ const navItems = [
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/banner', label: 'Banner', icon: Megaphone },
   { href: '/admin/settings', label: 'Site Settings', icon: Settings },
+  { href: '/admin/shopy', label: 'Shopy', icon: Store },
 ];
 
 export function AdminSidebar() {
