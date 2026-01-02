@@ -361,30 +361,33 @@ export default function ProductsClient() {
                   name="imageUrl"
                   render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Image URL</FormLabel>
-                        <div className="flex items-center gap-2">
-                            <FormControl>
-                                <Input {...field} />
-                            </FormControl>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                onClick={() => fileInputRef.current?.click()}
-                                disabled={isUploading}
-                                className="shrink-0"
-                            >
-                                {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                                <span className="sr-only">Upload Image</span>
-                            </Button>
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleImageUpload}
-                                className="hidden"
-                                accept="image/*"
-                            />
-                        </div>
+                        <FormLabel>Image</FormLabel>
+                        <FormControl>
+                            <div className="w-full">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={isUploading}
+                                    className="w-full"
+                                >
+                                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                                    Upload Image
+                                </Button>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleImageUpload}
+                                    className="hidden"
+                                    accept="image/*"
+                                />
+                            </div>
+                        </FormControl>
+                        {field.value && (
+                            <div className="mt-4 relative w-full aspect-video rounded-md overflow-hidden border">
+                                <Image src={field.value} alt="Product image preview" layout="fill" objectFit="cover" />
+                            </div>
+                        )}
                         <FormMessage />
                     </FormItem>
                   )}
