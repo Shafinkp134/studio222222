@@ -27,7 +27,6 @@ export default function ProductDetailPage() {
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
   const [shippingAddress, setShippingAddress] = useState('');
   const [phone, setPhone] = useState('');
-  const [transactionId, setTransactionId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [giftWrap, setGiftWrap] = useState(false);
   const [customerNotes, setCustomerNotes] = useState('');
@@ -79,7 +78,6 @@ export default function ProductDetailPage() {
     setPhone(userProfile?.phone || '');
 
     setIsOrderDialogOpen(true);
-    setTransactionId('');
     setGiftWrap(false);
     setCustomerNotes('');
   };
@@ -109,7 +107,7 @@ export default function ProductDetailPage() {
             items: [{ productId: product.id, name: product.name, quantity: 1 }],
             shippingAddress: shippingAddress,
             phone: phone,
-            transactionId: transactionId,
+            transactionId: '', // Set as empty for Cash on Delivery
             giftWrap: giftWrap,
             customerNotes: customerNotes,
         };
@@ -223,15 +221,7 @@ export default function ProductDetailPage() {
                       required
                   />
               </div>
-              <div className="space-y-2">
-                  <Label htmlFor="transactionId">Transaction ID (Optional)</Label>
-                  <Input
-                      id="transactionId"
-                      placeholder="Enter transaction ID if you have one"
-                      value={transactionId}
-                      onChange={(e) => setTransactionId(e.target.value)}
-                  />
-              </div>
+              
               <div className="space-y-2">
                   <Label htmlFor="customerNotes">Customer Review / Notes (Optional)</Label>
                   <Textarea
@@ -254,7 +244,7 @@ export default function ProductDetailPage() {
             <Button variant="outline" onClick={() => setIsOrderDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleConfirmOrder} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Confirm Order
+              Confirm Order (Cash on Delivery)
             </Button>
           </DialogFooter>
         </DialogContent>
