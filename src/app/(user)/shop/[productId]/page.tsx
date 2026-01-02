@@ -1,12 +1,13 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import { doc, getDoc, addDoc, collection } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Product, Order, UserProfile } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Loader2, ShoppingCart, Gift } from 'lucide-react';
+import { Loader2, ShoppingCart, Gift, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter, useParams } from 'next/navigation';
@@ -14,12 +15,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getUserProfile, updateUserProfile } from '@/app/actions';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 const GIFT_WRAP_COST = 15;
+
+type Review = {
+    customerName: string;
+    customerNotes: string;
+};
 
 export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
@@ -30,7 +38,9 @@ export default function ProductDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [giftWrap, setGiftWrap] = useState(false);
   const [customerNotes, setCustomerNotes] = useState('');
-  
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
@@ -40,8 +50,11 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (typeof productId !== 'string') return;
 
-    const fetchProduct = async () => {
+    const fetchProductAndReviews = async () => {
       setLoading(true);
+      setReviewsLoading(true);
+      
+      // Fetch Product
       const docRef = doc(db, 'products', productId);
       const docSnap = await getDoc(docRef);
 
@@ -56,9 +69,46 @@ export default function ProductDetailPage() {
         router.push('/shop');
       }
       setLoading(false);
+
+      // Fetch Reviews
+      try {
+        const ordersRef = collection(db, 'orders');
+        const q = query(
+            ordersRef,
+            where('items', 'array-contains-any', [{productId, name: docSnap.data()?.name, quantity: 1}]),
+            orderBy('date', 'desc'),
+            limit(10)
+        );
+
+        // A more scalable query would be to query a dedicated 'reviews' collection.
+        // For this project, we iterate through orders.
+        const querySnapshot = await getDocs(collection(db, 'orders'));
+        const fetchedReviews: Review[] = [];
+        querySnapshot.forEach((doc) => {
+            const order = doc.data() as Order;
+            const hasProduct = order.items.some(item => item.productId === productId);
+            if (hasProduct && order.customerNotes) {
+                fetchedReviews.push({
+                    customerName: order.customerName,
+                    customerNotes: order.customerNotes,
+                });
+            }
+        });
+
+        setReviews(fetchedReviews.slice(0, 10)); // Limit to 10 reviews
+      } catch (error) {
+        console.error("Error fetching reviews: ", error);
+        toast({
+            title: 'Could not load reviews',
+            description: 'There was an issue fetching customer reviews for this product.',
+            variant: 'destructive',
+        });
+      } finally {
+        setReviewsLoading(false);
+      }
     };
 
-    fetchProduct();
+    fetchProductAndReviews();
   }, [productId, router, toast]);
 
   const handlePlaceOrderClick = async () => {
@@ -135,6 +185,14 @@ export default function ProductDetailPage() {
   };
 
   const orderTotal = product ? product.price + (giftWrap ? GIFT_WRAP_COST : 0) : 0;
+  
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return 'A';
+    const names = name.split(' ');
+    return names.length > 1
+      ? names[0][0] + names[names.length - 1][0]
+      : name[0];
+  };
 
   if (loading) {
     return (
@@ -176,6 +234,39 @@ export default function ProductDetailPage() {
         </CardContent>
       </Card>
       
+      <Card>
+        <CardHeader>
+          <CardTitle>Customer Reviews</CardTitle>
+          <CardDescription>See what other customers are saying about this product.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {reviewsLoading ? (
+            <div className="flex justify-center items-center h-24">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : reviews.length > 0 ? (
+            <div className="space-y-6">
+              {reviews.map((review, index) => (
+                <div key={index} className="flex gap-4">
+                  <Avatar>
+                    <AvatarFallback>{getInitials(review.customerName)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-semibold">{review.customerName}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 text-primary fill-primary" />)}
+                    </div>
+                    <p className="text-muted-foreground mt-2">{review.customerNotes}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">No reviews yet for this product.</p>
+          )}
+        </CardContent>
+      </Card>
+
        <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -252,3 +343,5 @@ export default function ProductDetailPage() {
     </div>
   );
 }
+
+    
