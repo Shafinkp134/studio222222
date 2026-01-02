@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getUserProfile, updateUserProfile } from '@/app/actions';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const GIFT_WRAP_COST = 15;
 
@@ -185,68 +186,70 @@ export default function ProductDetailPage() {
               You are about to order {product?.name}. Please confirm the details below.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-                <h4 className="font-medium">{product?.name}</h4>
-                <div className="flex justify-between items-center">
-                  <p className="text-muted-foreground">Product Price:</p>
-                  <p className="text-muted-foreground">₹{product?.price.toFixed(2)}</p>
-                </div>
-                 <div className="flex justify-between items-center">
-                  <p className="text-muted-foreground">Gift Wrap:</p>
-                  <p className="text-muted-foreground">₹{giftWrap ? GIFT_WRAP_COST.toFixed(2) : '0.00'}</p>
-                </div>
-                 <div className="flex justify-between items-center font-medium border-t pt-2 mt-2">
-                  <p>Total:</p>
-                  <p>₹{orderTotal.toFixed(2)}</p>
-                </div>
+          <ScrollArea className="max-h-[70vh] pr-6">
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                  <h4 className="font-medium">{product?.name}</h4>
+                  <div className="flex justify-between items-center">
+                    <p className="text-muted-foreground">Product Price:</p>
+                    <p className="text-muted-foreground">₹{product?.price.toFixed(2)}</p>
+                  </div>
+                   <div className="flex justify-between items-center">
+                    <p className="text-muted-foreground">Gift Wrap:</p>
+                    <p className="text-muted-foreground">₹{giftWrap ? GIFT_WRAP_COST.toFixed(2) : '0.00'}</p>
+                  </div>
+                   <div className="flex justify-between items-center font-medium border-t pt-2 mt-2">
+                    <p>Total:</p>
+                    <p>₹{orderTotal.toFixed(2)}</p>
+                  </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="shipping-address">Shipping Address</Label>
+                  <Textarea
+                      id="shipping-address"
+                      placeholder="Enter your full shipping address"
+                      value={shippingAddress}
+                      onChange={(e) => setShippingAddress(e.target.value)}
+                      required
+                  />
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                      id="phone"
+                      placeholder="Enter your phone number"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                  />
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="transactionId">Transaction ID (Optional)</Label>
+                  <Input
+                      id="transactionId"
+                      placeholder="Enter transaction ID if you have one"
+                      value={transactionId}
+                      onChange={(e) => setTransactionId(e.target.value)}
+                  />
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="customerNotes">Customer Review / Notes (Optional)</Label>
+                  <Textarea
+                      id="customerNotes"
+                      placeholder="Add any special instructions or notes for your order."
+                      value={customerNotes}
+                      onChange={(e) => setCustomerNotes(e.target.value)}
+                  />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="gift-wrap" checked={giftWrap} onCheckedChange={(checked) => setGiftWrap(checked as boolean)} />
+                <Label htmlFor="gift-wrap" className="flex items-center gap-2">
+                  <Gift className="h-4 w-4" />
+                  Add Gift Wrap (+₹{GIFT_WRAP_COST.toFixed(2)})
+                </Label>
+              </div>
             </div>
-            <div className="space-y-2">
-                <Label htmlFor="shipping-address">Shipping Address</Label>
-                <Textarea
-                    id="shipping-address"
-                    placeholder="Enter your full shipping address"
-                    value={shippingAddress}
-                    onChange={(e) => setShippingAddress(e.target.value)}
-                    required
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                    id="phone"
-                    placeholder="Enter your phone number"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="transactionId">Transaction ID (Optional)</Label>
-                <Input
-                    id="transactionId"
-                    placeholder="Enter transaction ID if you have one"
-                    value={transactionId}
-                    onChange={(e) => setTransactionId(e.target.value)}
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="customerNotes">Customer Review / Notes (Optional)</Label>
-                <Textarea
-                    id="customerNotes"
-                    placeholder="Add any special instructions or notes for your order."
-                    value={customerNotes}
-                    onChange={(e) => setCustomerNotes(e.target.value)}
-                />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox id="gift-wrap" checked={giftWrap} onCheckedChange={(checked) => setGiftWrap(checked as boolean)} />
-              <Label htmlFor="gift-wrap" className="flex items-center gap-2">
-                <Gift className="h-4 w-4" />
-                Add Gift Wrap (+₹{GIFT_WRAP_COST.toFixed(2)})
-              </Label>
-            </div>
-          </div>
+          </ScrollArea>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsOrderDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleConfirmOrder} disabled={isSubmitting}>
