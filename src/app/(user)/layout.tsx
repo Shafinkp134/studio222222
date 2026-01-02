@@ -62,8 +62,8 @@ function UserHeader() {
                 </Link>
               </Button>
               {isAdmin && (
-                <Button variant={pathname.startsWith('/dashboard') || pathname.startsWith('/products') || pathname.startsWith('/orders') || pathname.startsWith('/banner') ? 'secondary' : 'ghost'} asChild>
-                    <Link href="/dashboard">
+                <Button variant={pathname.startsWith('/admin') ? 'secondary' : 'ghost'} asChild>
+                    <Link href="/admin/dashboard">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         Admin Panel
                     </Link>
@@ -102,7 +102,7 @@ function UserHeader() {
                                 Account
                             </Link>
                             {isAdmin && (
-                              <Link href="/dashboard" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname === '/dashboard' && 'bg-muted text-primary')}>
+                              <Link href="/admin/dashboard" className={cn('flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary', pathname.startsWith('/admin') && 'bg-muted text-primary')}>
                                   <LayoutDashboard className="h-4 w-4" />
                                   Admin Panel
                               </Link>

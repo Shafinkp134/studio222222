@@ -13,11 +13,11 @@ import type { SiteSettings } from '@/lib/types';
 
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
-  { href: '/products', label: 'Products', icon: Gift },
-  { href: '/orders', label: 'Orders', icon: ClipboardList },
-  { href: '/users', label: 'Users', icon: Users },
-  { href: '/banner', label: 'Banner', icon: Megaphone },
+  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutGrid },
+  { href: '/admin/products', label: 'Products', icon: Gift },
+  { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
+  { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/banner', label: 'Banner', icon: Megaphone },
   { href: '/admin/settings', label: 'Site Settings', icon: Settings },
 ];
 
@@ -37,7 +37,7 @@ export function AdminSidebar() {
   return (
     <aside className="hidden w-64 flex-col border-r bg-card md:flex">
       <div className="flex h-16 items-center border-b px-6">
-        <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
+        <Link href="/admin/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
           <Logo logoUrl={siteSettings.logoUrl} className="h-6 w-6 text-primary" />
           <span>{siteSettings.name}</span>
         </Link>
