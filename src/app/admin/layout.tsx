@@ -8,7 +8,7 @@ import { AdminSidebar } from '@/components/admin/sidebar';
 import { AdminHeader } from '@/components/admin/header';
 
 const SUPER_ADMINS = ['admin1@gmail.com'];
-const PRODUCT_MANAGERS = ['shafinkp444@gmail.com'];
+const PRODUCT_MANAGERS: string[] = []; // Shafin is now a staff member, not a product manager in the admin panel
 const ALL_ADMINS = [...SUPER_ADMINS, ...PRODUCT_MANAGERS];
 
 const RESTRICTED_FOR_PRODUCT_MANAGER = [
