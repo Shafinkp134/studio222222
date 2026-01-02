@@ -10,21 +10,25 @@ import { useEffect, useState } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { SiteSettings } from '@/lib/types';
+import { useAuth } from '@/hooks/use-auth';
 
+const SUPER_ADMINS = ['admin1@gmail.com'];
 
-const navItems = [
-  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutGrid },
-  { href: '/admin/products', label: 'Products', icon: Gift },
-  { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
-  { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/banner', label: 'Banner', icon: Megaphone },
-  { href: '/admin/settings', label: 'Site Settings', icon: Settings },
-  { href: '/admin/shopy', label: 'Shopy', icon: Store },
+const allNavItems = [
+  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutGrid, requiredRole: 'all' },
+  { href: '/admin/products', label: 'Products', icon: Gift, requiredRole: 'all' },
+  { href: '/admin/orders', label: 'Orders', icon: ClipboardList, requiredRole: 'super' },
+  { href: '/admin/users', label: 'Users', icon: Users, requiredRole: 'super' },
+  { href: '/admin/banner', label: 'Banner', icon: Megaphone, requiredRole: 'super' },
+  { href: '/admin/settings', label: 'Site Settings', icon: Settings, requiredRole: 'super' },
+  { href: '/admin/shopy', label: 'Shopy', icon: Store, requiredRole: 'super' },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
   const [siteSettings, setSiteSettings] = useState<{name: string, logoUrl: string}>({name: 'MRSHOPY', logoUrl: ''});
+  const isSuperAdmin = user && SUPER_ADMINS.includes(user.email ?? '');
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "settings", "siteInfo"), (doc) => {
@@ -34,6 +38,13 @@ export function AdminSidebar() {
     });
     return () => unsub();
   }, []);
+
+  const navItems = allNavItems.filter(item => {
+    if (item.requiredRole === 'super') {
+      return isSuperAdmin;
+    }
+    return true;
+  });
 
   return (
     <aside className="hidden w-64 flex-col border-r bg-card md:flex">

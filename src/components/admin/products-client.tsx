@@ -53,6 +53,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Badge } from '../ui/badge';
 import { ScrollArea } from '../ui/scroll-area';
+import { useAuth } from '@/hooks/use-auth';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -65,6 +66,8 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
+const ALL_ADMINS = ['admin1@gmail.com', 'shafinkp444@gmail.com'];
+
 export default function ProductsClient() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,6 +78,8 @@ export default function ProductsClient() {
   const router = useRouter();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
+  const canManageProducts = user && ALL_ADMINS.includes(user.email ?? '');
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
@@ -193,10 +198,12 @@ export default function ProductsClient() {
   return (
     <>
       <div className="flex justify-end">
-        <Button onClick={() => handleDialogOpen(null)}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Product
-        </Button>
+        {canManageProducts && (
+            <Button onClick={() => handleDialogOpen(null)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Product
+            </Button>
+        )}
       </div>
 
       <Card>
@@ -209,7 +216,7 @@ export default function ProductsClient() {
                 <TableHead className="hidden md:table-cell">Category</TableHead>
                 <TableHead className="hidden md:table-cell">Price</TableHead>
                 <TableHead className="hidden md:table-cell">Stock</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                {canManageProducts && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -230,37 +237,39 @@ export default function ProductsClient() {
                   </TableCell>
                   <TableCell className="hidden md:table-cell">₹{product.price.toFixed(2)}</TableCell>
                   <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleDialogOpen(product)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the product.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDelete(product.id)}
-                              className="bg-destructive hover:bg-destructive/90"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
+                  {canManageProducts && (
+                    <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleDialogOpen(product)}>
+                            <Edit className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the product.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                onClick={() => handleDelete(product.id)}
+                                className="bg-destructive hover:bg-destructive/90"
+                                >
+                                Delete
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
