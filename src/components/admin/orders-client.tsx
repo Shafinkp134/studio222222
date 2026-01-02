@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
@@ -194,7 +195,12 @@ export default function OrdersClient() {
             )}
             <div className="space-y-1">
               <p className="text-sm font-medium">Shipping Address:</p>
-              <p className="text-sm text-muted-foreground">{selectedOrder?.shippingAddress}</p>
+              <p className="text-sm text-muted-foreground">
+                {selectedOrder?.shippingAddress.fullName}<br />
+                {selectedOrder?.shippingAddress.houseName}<br />
+                {selectedOrder?.shippingAddress.city}, {selectedOrder?.shippingAddress.state}<br />
+                Panchayat: {selectedOrder?.shippingAddress.panjayath}
+              </p>
             </div>
             {selectedOrder?.customerNotes && (
               <div className="space-y-1">

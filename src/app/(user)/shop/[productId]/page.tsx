@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { doc, getDoc, addDoc, collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Product, Order, UserProfile } from '@/lib/types';
+import type { Product, Order, UserProfile, Address } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { Loader2, ShoppingCart, Gift, Star } from 'lucide-react';
@@ -29,11 +29,19 @@ type Review = {
     customerNotes: string;
 };
 
+const initialAddressState: Address = {
+    fullName: '',
+    houseName: '',
+    city: '',
+    state: '',
+    panjayath: '',
+};
+
 export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
-  const [shippingAddress, setShippingAddress] = useState('');
+  const [shippingAddress, setShippingAddress] = useState<Address>(initialAddressState);
   const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [giftWrap, setGiftWrap] = useState(false);
@@ -124,7 +132,7 @@ export default function ProductDetailPage() {
     
     // Fetch user profile to pre-fill details
     const userProfile = await getUserProfile(user.uid);
-    setShippingAddress(userProfile?.shippingAddress || '');
+    setShippingAddress(userProfile?.shippingAddress || { ...initialAddressState, fullName: user.displayName || '' });
     setPhone(userProfile?.phone || '');
 
     setIsOrderDialogOpen(true);
@@ -135,7 +143,7 @@ export default function ProductDetailPage() {
   const handleConfirmOrder = async () => {
     if (!user || !product) return;
 
-    if (!shippingAddress.trim() || !phone.trim()) {
+    if (!shippingAddress.fullName || !shippingAddress.houseName || !shippingAddress.city || !shippingAddress.state || !shippingAddress.panjayath || !phone.trim()) {
         toast({
             title: 'Missing Information',
             description: 'Please fill out all required fields.',
@@ -149,7 +157,7 @@ export default function ProductDetailPage() {
         const total = product.price + (giftWrap ? GIFT_WRAP_COST : 0);
 
         const newOrder: Omit<Order, 'id'> = {
-            customerName: user.displayName || 'Anonymous',
+            customerName: shippingAddress.fullName || user.displayName || 'Anonymous',
             customerEmail: user.email || 'no-email',
             date: new Date().toISOString(),
             status: 'Pending',
@@ -183,6 +191,11 @@ export default function ProductDetailPage() {
         setIsSubmitting(false);
     }
   };
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setShippingAddress(prev => ({...prev, [name]: value}));
+  }
 
   const orderTotal = product ? product.price + (giftWrap ? GIFT_WRAP_COST : 0) : 0;
   
@@ -277,58 +290,65 @@ export default function ProductDetailPage() {
           </DialogHeader>
           <ScrollArea className="max-h-[70vh] pr-6">
             <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                  <h4 className="font-medium">{product?.name}</h4>
-                  <div className="flex justify-between items-center">
-                    <p className="text-muted-foreground">Product Price:</p>
-                    <p className="text-muted-foreground">₹{product?.price.toFixed(2)}</p>
-                  </div>
-                   <div className="flex justify-between items-center">
-                    <p className="text-muted-foreground">Gift Wrap:</p>
-                    <p className="text-muted-foreground">₹{giftWrap ? GIFT_WRAP_COST.toFixed(2) : '0.00'}</p>
-                  </div>
-                   <div className="flex justify-between items-center font-medium border-t pt-2 mt-2">
-                    <p>Total:</p>
-                    <p>₹{orderTotal.toFixed(2)}</p>
-                  </div>
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="shipping-address">Shipping Address</Label>
-                  <Textarea
-                      id="shipping-address"
-                      placeholder="Enter your full shipping address"
-                      value={shippingAddress}
-                      onChange={(e) => setShippingAddress(e.target.value)}
-                      required
-                  />
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                      id="phone"
-                      placeholder="Enter your phone number"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      required
-                  />
-              </div>
-              
-              <div className="space-y-2">
-                  <Label htmlFor="customerNotes">Customer Review / Notes (Optional)</Label>
-                  <Textarea
-                      id="customerNotes"
-                      placeholder="Add any special instructions or notes for your order."
-                      value={customerNotes}
-                      onChange={(e) => setCustomerNotes(e.target.value)}
-                  />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="gift-wrap" checked={giftWrap} onCheckedChange={(checked) => setGiftWrap(checked as boolean)} />
-                <Label htmlFor="gift-wrap" className="flex items-center gap-2">
-                  <Gift className="h-4 w-4" />
-                  Add Gift Wrap (+₹{GIFT_WRAP_COST.toFixed(2)})
-                </Label>
-              </div>
+                <div className="space-y-2">
+                    <h4 className="font-medium">{product?.name}</h4>
+                    <div className="flex justify-between items-center">
+                        <p className="text-muted-foreground">Product Price:</p>
+                        <p className="text-muted-foreground">₹{product?.price.toFixed(2)}</p>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <p className="text-muted-foreground">Gift Wrap:</p>
+                        <p className="text-muted-foreground">₹{giftWrap ? GIFT_WRAP_COST.toFixed(2) : '0.00'}</p>
+                    </div>
+                    <div className="flex justify-between items-center font-medium border-t pt-2 mt-2">
+                        <p>Total:</p>
+                        <p>₹{orderTotal.toFixed(2)}</p>
+                    </div>
+                </div>
+                
+                <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input id="fullName" name="fullName" value={shippingAddress.fullName} onChange={handleAddressChange} required />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="houseName">House Name</Label>
+                    <Input id="houseName" name="houseName" value={shippingAddress.houseName} onChange={handleAddressChange} required />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="city">City</Label>
+                        <Input id="city" name="city" value={shippingAddress.city} onChange={handleAddressChange} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="state">State</Label>
+                        <Input id="state" name="state" value={shippingAddress.state} onChange={handleAddressChange} required />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="panjayath">Panchayat</Label>
+                    <Input id="panjayath" name="panjayath" value={shippingAddress.panjayath} onChange={handleAddressChange} required />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="customerNotes">Customer Review / Notes (Optional)</Label>
+                    <Textarea
+                        id="customerNotes"
+                        placeholder="Add any special instructions or notes for your order."
+                        value={customerNotes}
+                        onChange={(e) => setCustomerNotes(e.target.value)}
+                    />
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Checkbox id="gift-wrap" checked={giftWrap} onCheckedChange={(checked) => setGiftWrap(checked as boolean)} />
+                    <Label htmlFor="gift-wrap" className="flex items-center gap-2">
+                        <Gift className="h-4 w-4" />
+                        Add Gift Wrap (+₹{GIFT_WRAP_COST.toFixed(2)})
+                    </Label>
+                </div>
             </div>
           </ScrollArea>
           <DialogFooter>
@@ -343,5 +363,3 @@ export default function ProductDetailPage() {
     </div>
   );
 }
-
-    

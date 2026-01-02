@@ -1,3 +1,4 @@
+
 export type Product = {
   id: string;
   name: string;
@@ -8,6 +9,14 @@ export type Product = {
   category: string;
 };
 
+export type Address = {
+  fullName: string;
+  houseName: string;
+  city: string;
+  state: string;
+  panjayath: string;
+};
+
 export type Order = {
   id: string;
   customerName: string;
@@ -16,7 +25,7 @@ export type Order = {
   status: 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled';
   total: number;
   items: { productId: string; quantity: number; name: string }[];
-  shippingAddress: string;
+  shippingAddress: Address;
   phone?: string;
   transactionId?: string;
   giftWrap?: boolean;
@@ -28,7 +37,7 @@ export type UserProfile = {
   email: string;
   displayName: string;
   photoURL?: string;
-  shippingAddress?: string;
+  shippingAddress?: Address;
   phone?: string;
 };
 
