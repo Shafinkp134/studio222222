@@ -17,7 +17,7 @@ const faqs = [
     },
     {
         question: "What is your return policy?",
-        answer: "We have a 7-day return policy for eligible items. Please refer to our Return & Refund Policy page for detailed information on the process and eligibility."
+        answer: "All sales are final. We do not accept returns or provide refunds. Please see our Return & Refund Policy page for more details."
     },
     {
         question: "How can I track my order?",
