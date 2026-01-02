@@ -46,6 +46,12 @@ export function SiteFooter({ siteSettings }: SiteFooterProps) {
             <Link href="/return-refund-policy" className="text-sm text-muted-foreground hover:text-primary">
                 Return & Refund Policy
             </Link>
+            <Link href="/payment-policy" className="text-sm text-muted-foreground hover:text-primary">
+                Payment Policy
+            </Link>
+             <Link href="/disclaimer" className="text-sm text-muted-foreground hover:text-primary">
+                Disclaimer
+            </Link>
             <Link href="/terms-and-conditions" className="text-sm text-muted-foreground hover:text-primary">
                 Terms & Conditions
             </Link>
