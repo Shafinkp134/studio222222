@@ -120,20 +120,16 @@ export default function ProductDetailPage() {
   }, [productId, router, toast]);
 
   const handlePlaceOrderClick = async () => {
-    if (!user) {
-      toast({
-        title: 'Not logged in',
-        description: 'You need to be logged in to place an order.',
-        variant: 'destructive',
-      });
-      router.push('/login');
-      return;
+    if (user) {
+      // Fetch user profile to pre-fill details
+      const userProfile = await getUserProfile(user.uid);
+      setShippingAddress(userProfile?.shippingAddress || { ...initialAddressState, fullName: user.displayName || '' });
+      setPhone(userProfile?.phone || '');
+    } else {
+      // Reset form if no user is logged in
+      setShippingAddress(initialAddressState);
+      setPhone('');
     }
-    
-    // Fetch user profile to pre-fill details
-    const userProfile = await getUserProfile(user.uid);
-    setShippingAddress(userProfile?.shippingAddress || { ...initialAddressState, fullName: user.displayName || '' });
-    setPhone(userProfile?.phone || '');
 
     setIsOrderDialogOpen(true);
     setGiftWrap(false);
@@ -141,7 +137,7 @@ export default function ProductDetailPage() {
   };
   
   const handleConfirmOrder = async () => {
-    if (!user || !product) return;
+    if (!product) return;
 
     if (!shippingAddress.fullName || !shippingAddress.houseName || !shippingAddress.city || !shippingAddress.state || !shippingAddress.panjayath || !phone.trim()) {
         toast({
@@ -157,8 +153,8 @@ export default function ProductDetailPage() {
         const total = product.price + (giftWrap ? GIFT_WRAP_COST : 0);
 
         const newOrder: Omit<Order, 'id'> = {
-            customerName: shippingAddress.fullName || user.displayName || 'Anonymous',
-            customerEmail: user.email || 'no-email',
+            customerName: shippingAddress.fullName || 'Anonymous',
+            customerEmail: user?.email || 'guest-order',
             date: new Date().toISOString(),
             status: 'Pending',
             total: total,
@@ -172,8 +168,10 @@ export default function ProductDetailPage() {
 
         await addDoc(collection(db, 'orders'), newOrder);
 
-        // Update user profile with new address and phone
-        await updateUserProfile(user.uid, { shippingAddress, phone });
+        // Update user profile with new address and phone if the user is logged in
+        if (user) {
+          await updateUserProfile(user.uid, { shippingAddress, phone });
+        }
 
         toast({
             title: 'Order Placed!',
