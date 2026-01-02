@@ -66,7 +66,9 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-const ALL_ADMINS = ['admin1@gmail.com', 'shafinkp444@gmail.com'];
+const SUPER_ADMINS = ['admin1@gmail.com'];
+const STAFF_USERS = ['shafinkp444@gmail.com', 'staff1@gmail.com'];
+const ALL_AUTHORIZED_USERS = [...SUPER_ADMINS, ...STAFF_USERS];
 
 export default function ProductsClient() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -79,7 +81,7 @@ export default function ProductsClient() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
-  const canManageProducts = user && ALL_ADMINS.includes(user.email ?? '');
+  const canManageProducts = user && ALL_AUTHORIZED_USERS.includes(user.email ?? '');
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
