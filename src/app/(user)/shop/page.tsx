@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 function CategorySidebar({ categories, activeCategory }: { categories: string[], activeCategory: string | null }) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <aside className="w-full md:w-64 lg:w-72">
       <Card>
