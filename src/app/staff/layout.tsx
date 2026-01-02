@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react';
 import { StaffSidebar } from '@/components/staff/sidebar';
 import { AdminHeader } from '@/components/admin/header';
 
-const STAFF_USERS = ['shafinkp444@gmail.com'];
+const STAFF_USERS = ['shafinkp444@gmail.com', 'staff1@gmail.com'];
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();

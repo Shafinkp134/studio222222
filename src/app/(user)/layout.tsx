@@ -19,7 +19,7 @@ import type { SiteSettings } from '@/lib/types';
 
 
 const ADMIN_EMAIL = 'admin1@gmail.com';
-const STAFF_USERS = ['shafinkp444@gmail.com'];
+const STAFF_USERS = ['shafinkp444@gmail.com', 'staff1@gmail.com'];
 
 function UserHeader() {
   const [open, setOpen] = useState(false);
