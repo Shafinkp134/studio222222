@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { Logo } from './logo';
 import { Instagram } from 'lucide-react';
@@ -33,14 +34,23 @@ export function SiteFooter({ siteSettings }: SiteFooterProps) {
             <Link href="/about" className="text-sm text-muted-foreground hover:text-primary">
                 About Us
             </Link>
+            <Link href="/contact-us" className="text-sm text-muted-foreground hover:text-primary">
+                Contact Us
+            </Link>
+            <Link href="/faq" className="text-sm text-muted-foreground hover:text-primary">
+                FAQ
+            </Link>
+            <Link href="/shipping-policy" className="text-sm text-muted-foreground hover:text-primary">
+                Shipping Policy
+            </Link>
+            <Link href="/return-refund-policy" className="text-sm text-muted-foreground hover:text-primary">
+                Return & Refund Policy
+            </Link>
             <Link href="/terms-and-conditions" className="text-sm text-muted-foreground hover:text-primary">
                 Terms & Conditions
             </Link>
             <Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary">
                 Privacy Policy
-            </Link>
-            <Link href="https://wa.me/918590814673" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary">
-                Support
             </Link>
             <div className="flex items-center gap-2">
                 <a href="https://instagram.com/shafin.k.p" target="_blank" rel="noreferrer">
